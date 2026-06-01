@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SwingMind – AI Golf Coach Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080f0a;--bg2:#0f1f12;--bg3:#162318;
+  --green:#4ade80;--green-dim:rgba(74,222,128,0.1);
+  --gborder:rgba(74,222,128,0.15);--gborder2:rgba(74,222,128,0.3);
+  --text:#f0faf2;--muted:#7aad86;
+  --serif:'Syne',sans-serif;--sans:'DM Sans',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.7;min-height:100vh}
+nav{display:flex;align-items:center;justify-content:space-between;padding:1.25rem 2rem;border-bottom:1px solid var(--gborder)}
+.logo{font-family:var(--serif);font-size:1.2rem;font-weight:800;letter-spacing:-0.02em}
+.logo span{color:var(--green)}
+.back-link{font-size:.85rem;color:var(--muted);text-decoration:none;display:flex;align-items:center;gap:.4rem;transition:color .2s}
+.back-link:hover{color:var(--green)}
+.hero{text-align:center;padding:1.75rem 1.5rem 1.25rem}
+.hero h1{font-family:var(--serif);font-size:clamp(1.5rem,4vw,2.6rem);font-weight:800;letter-spacing:-0.03em;margin-bottom:.5rem}
+.hero h1 span{color:var(--green)}
+.hero p{color:var(--muted);max-width:460px;margin:0 auto;font-size:.875rem}
+@media(max-width:480px){.hero{padding:1.25rem 1.5rem .75rem}}
+.progress-wrap{max-width:600px;margin:1.75rem auto;padding:0 1.5rem}
+.progress-bar{height:3px;background:var(--gborder);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:var(--green);border-radius:2px;transition:width .4s ease}
+.progress-labels{display:flex;justify-content:space-between;margin-top:.45rem}
+.progress-label{font-size:.7rem;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.progress-label.active{color:var(--green)}
+.steps-wrap{max-width:600px;margin:0 auto;padding:0 1.5rem 4rem}
+.step{display:none;animation:fadeUp .3s ease both}
+.step.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.step-title{font-family:var(--serif);font-size:1.25rem;font-weight:700;margin-bottom:.35rem}
+.step-sub{color:var(--muted);font-size:.875rem;margin-bottom:1.5rem}
+.field{margin-bottom:1.1rem}
+.field label{display:block;font-size:.78rem;font-weight:500;color:var(--muted);margin-bottom:.35rem;letter-spacing:.03em;text-transform:uppercase}
+.field input,.field select,.field textarea{width:100%;background:var(--bg2);border:1px solid var(--gborder2);border-radius:10px;padding:.72rem 1rem;color:var(--text);font-family:var(--sans);font-size:.95rem;transition:border-color .2s,box-shadow .2s;outline:none}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(74,222,128,0.1)}
+.field select option{background:var(--bg2)}
+.field textarea{resize:vertical;min-height:72px}
+.radio-group{display:grid;grid-template-columns:1fr 1fr;gap:.55rem}
+.radio-group.three{grid-template-columns:1fr 1fr 1fr}
+.radio-opt{border:1px solid var(--gborder2);border-radius:10px;padding:.75rem .9rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:.5rem;font-size:.875rem}
+.radio-opt:hover{border-color:var(--green);background:var(--green-dim)}
+.radio-opt.selected{border-color:var(--green);background:var(--green-dim);color:var(--green)}
+.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:.9rem}
+.section-divider{font-size:.75rem;font-weight:500;color:var(--green);letter-spacing:.08em;text-transform:uppercase;margin:1.5rem 0 .75rem;padding-bottom:.4rem;border-bottom:1px solid var(--gborder)}
+.btn-row{display:flex;gap:.65rem;margin-top:1.75rem}
+.btn-next{flex:1;background:var(--green);color:#080f0a;border:none;border-radius:100px;padding:.875rem 2rem;font-size:.975rem;font-weight:500;cursor:pointer;font-family:var(--sans);transition:opacity .2s,transform .15s}
+.btn-next:hover{opacity:.88;transform:translateY(-1px)}
+.btn-back{background:transparent;color:var(--muted);border:1px solid var(--gborder2);border-radius:100px;padding:.875rem 1.4rem;font-size:.975rem;font-weight:500;cursor:pointer;font-family:var(--sans);transition:all .2s}
+.btn-back:hover{border-color:var(--green);color:var(--green)}
+
+/* RESULT */
+.result-preview{background:var(--bg2);border:1px solid var(--gborder);border-radius:12px;padding:1rem 1.25rem;margin-top:1.25rem;max-height:220px;overflow-y:auto;position:relative}
+.result-preview pre{white-space:pre-wrap;word-break:break-word;font-family:var(--sans);font-size:.8rem;line-height:1.6;color:var(--muted)}
+.result-preview::-webkit-scrollbar{width:4px}
+.result-preview::-webkit-scrollbar-track{background:transparent}
+.result-preview::-webkit-scrollbar-thumb{background:var(--gborder2);border-radius:2px}
+.copy-btn{width:100%;margin-top:1rem;background:var(--green);color:#080f0a;border:none;border-radius:100px;padding:.95rem;font-size:1rem;font-weight:500;cursor:pointer;font-family:var(--sans);transition:opacity .2s;display:flex;align-items:center;justify-content:center;gap:.5rem}
+.copy-btn:hover{opacity:.88}
+.copy-btn.copied{background:var(--bg3);color:var(--green);border:1px solid var(--green)}
+.premium-box{margin-top:1rem;background:var(--bg3);border:1px solid var(--gborder2);border-radius:16px;padding:1.25rem}
+.premium-box .tag{font-size:.72rem;font-weight:500;color:var(--green);letter-spacing:.07em;text-transform:uppercase;margin-bottom:.4rem}
+.premium-box h3{font-size:1rem;font-weight:500;margin-bottom:.3rem}
+.premium-box p{font-size:.825rem;color:var(--muted);margin-bottom:1rem}
+.premium-btn{display:block;width:100%;text-align:center;background:var(--green);color:#080f0a;border:none;border-radius:100px;padding:.875rem;font-size:.975rem;font-weight:500;text-decoration:none;cursor:pointer;font-family:var(--sans);transition:opacity .2s}
+.premium-btn:hover{opacity:.88}
+.tip-box{background:var(--green-dim);border:1px solid var(--gborder2);border-radius:10px;padding:.875rem 1rem;margin-top:.75rem;font-size:.825rem;color:var(--muted)}
+.tip-box strong{color:var(--green)}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" style="text-decoration:none;color:inherit"><div class="logo"><span>Swing</span>Mind</div></a>
+  <a href="index.html" class="back-link">← Zur Hauptseite</a>
+</nav>
+
+<div class="hero">
+  <h1>Dein <span>persönlicher</span> AI Golf Coach</h1>
+  <p>Füll den Fragebogen aus — bekomme deinen persönlichen Mastercode und füge ihn in die KI ein.</p>
+</div>
+
+<div style="max-width:600px;margin:0 auto 1.25rem;padding:0 1.5rem">
+  <div style="display:flex;align-items:center;gap:.4rem">
+    <div style="flex:1;background:var(--bg2);border:1px solid var(--gborder);border-radius:10px;padding:.65rem .5rem;text-align:center">
+      <div style="font-size:1.1rem;margin-bottom:.25rem">📝</div>
+      <div style="font-size:.7rem;font-weight:500;color:var(--text);line-height:1.3">Fragebogen<br>ausfüllen</div>
+    </div>
+    <div style="color:var(--green);font-size:1rem;flex-shrink:0">→</div>
+    <div style="flex:1;background:var(--bg2);border:1px solid var(--gborder);border-radius:10px;padding:.65rem .5rem;text-align:center">
+      <div style="font-size:1.1rem;margin-bottom:.25rem">📋</div>
+      <div style="font-size:.7rem;font-weight:500;color:var(--text);line-height:1.3">Mastercode<br>kopieren</div>
+    </div>
+    <div style="color:var(--green);font-size:1rem;flex-shrink:0">→</div>
+    <div style="flex:1;background:var(--bg2);border:1px solid var(--gborder);border-radius:10px;padding:.65rem .5rem;text-align:center">
+      <div style="font-size:1.1rem;margin-bottom:.25rem">🤖</div>
+      <div style="font-size:.7rem;font-weight:500;color:var(--text);line-height:1.3">In KI<br>einfügen</div>
+    </div>
+  </div>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:20%"></div></div>
+  <div class="progress-labels">
+    <span class="progress-label active" id="lbl1">Profil</span>
+    <span class="progress-label" id="lbl2">Niveau</span>
+    <span class="progress-label" id="lbl3">Spiel</span>
+    <span class="progress-label" id="lbl4">Equipment</span>
+    <span class="progress-label" id="lbl5">Ziele</span>
+  </div>
+</div>
+
+<div class="steps-wrap">
+
+  <!-- STEP 1 -->
+  <div class="step active" id="step1">
+    <div class="step-title">Dein Profil</div>
+    <div class="step-sub">Damit dein Coach dich von Anfang an kennt.</div>
+    <div class="field"><label>Dein Name</label><input type="text" id="name" placeholder="z.B. Max Mustermann"></div>
+    <div class="field">
+      <label>Spielseite</label>
+      <div class="radio-group">
+        <div class="radio-opt" onclick="selectOpt(this,'side','Rechtshänder')">⛳ Rechtshänder</div>
+        <div class="radio-opt" onclick="selectOpt(this,'side','Linkshänder')">⛳ Linkshänder</div>
+      </div>
+      <input type="hidden" id="side">
+    </div>
+    <div class="field-grid">
+      <div class="field"><label>Körpergröße</label><input type="text" id="height" placeholder="z.B. 182 cm"></div>
+      <div class="field">
+        <label>Armspanne</label>
+        <select id="arms"><option value="">Auswählen</option><option>Normal</option><option>Lang</option><option>Kurz</option></select>
+      </div>
+    </div>
+    <div class="field">
+      <label>Körperbau</label>
+      <div class="radio-group">
+        <div class="radio-opt" onclick="selectOpt(this,'build','Athletisch')">💪 Athletisch</div>
+        <div class="radio-opt" onclick="selectOpt(this,'build','Schlank')">🏃 Schlank</div>
+        <div class="radio-opt" onclick="selectOpt(this,'build','Kräftig')">🏋️ Kräftig</div>
+        <div class="radio-opt" onclick="selectOpt(this,'build','Normal')">👤 Normal</div>
+      </div>
+      <input type="hidden" id="build">
+    </div>
+    <div class="field"><label>Sportlicher Hintergrund</label><input type="text" id="sport" placeholder="z.B. Fußball, Fitness, Tennis"></div>
+    <div class="btn-row"><button class="btn-next" onclick="nextStep(1)">Weiter →</button></div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step" id="step2">
+    <div class="step-title">Dein Golfniveau</div>
+    <div class="step-sub">Damit dein Coach weiß wo du stehst.</div>
+    <div class="field">
+      <label>Wie lange spielst du schon?</label>
+      <select id="experience"><option value="">Auswählen</option><option>Weniger als 6 Monate</option><option>6–12 Monate</option><option>1–2 Jahre</option><option>2–5 Jahre</option><option>Mehr als 5 Jahre</option></select>
+    </div>
+    <div class="field">
+      <label>Platzreife</label>
+      <div class="radio-group three">
+        <div class="radio-opt" onclick="selectOpt(this,'license','Ja')">✅ Ja</div>
+        <div class="radio-opt" onclick="selectOpt(this,'license','Nein')">❌ Nein</div>
+        <div class="radio-opt" onclick="selectOpt(this,'license','In Vorbereitung')">📚 In Vorb.</div>
+      </div>
+      <input type="hidden" id="license">
+    </div>
+    <div class="field-grid">
+      <div class="field"><label>Handicap (falls vorhanden)</label><input type="text" id="handicap" placeholder="z.B. 36 oder keins"></div>
+      <div class="field"><label>Letzte Scores</label><input type="text" id="scores" placeholder="z.B. 54 / 58 / 51 für 9 Loch"></div>
+    </div>
+    <div class="field">
+      <label>Trainingsfrequenz</label>
+      <div class="radio-group">
+        <div class="radio-opt" onclick="selectOpt(this,'frequency','1x pro Woche')">1x / Woche</div>
+        <div class="radio-opt" onclick="selectOpt(this,'frequency','2x pro Woche')">2x / Woche</div>
+        <div class="radio-opt" onclick="selectOpt(this,'frequency','3x+ pro Woche')">3x+ / Woche</div>
+        <div class="radio-opt" onclick="selectOpt(this,'frequency','Unregelmäßig')">Unregelmäßig</div>
+      </div>
+      <input type="hidden" id="frequency">
+    </div>
+    <div class="field"><label>Oder selbst angeben</label><input type="text" id="frequency_custom" placeholder="z.B. 2x Range, 1x Platz pro Monat"></div>
+    <div class="btn-row"><button class="btn-back" onclick="prevStep(2)">← Zurück</button><button class="btn-next" onclick="nextStep(2)">Weiter →</button></div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="step" id="step3">
+    <div class="step-title">Stärken & Schwächen</div>
+    <div class="step-sub">Ehrlichkeit hilft deinem Coach mehr als du denkst.</div>
+    <div class="field"><label>Was läuft gut?</label><input type="text" id="strengths" placeholder="z.B. Putting, kurze Eisen"></div>
+    <div class="field"><label>Größte Probleme</label><input type="text" id="weaknesses" placeholder="z.B. Abschlag, Bunker, Toppen"></div>
+    <div class="field"><label>Was übst du gerade gezielt?</label><input type="text" id="practicing" placeholder="z.B. Körperrotation, Griff, Gewichtsverlagerung"></div>
+    <div class="btn-row"><button class="btn-back" onclick="prevStep(3)">← Zurück</button><button class="btn-next" onclick="nextStep(3)">Weiter →</button></div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="step" id="step4">
+    <div class="step-title">Dein Equipment</div>
+    <div class="step-sub">Je genauer, desto besser die Empfehlungen.</div>
+
+    <div class="section-divider">Schläger-Set</div>
+    <div class="field"><label>Komplett-Set (falls vorhanden)</label><input type="text" id="clubs" placeholder="z.B. Callaway Strata, TaylorMade SIM Max — oder leer lassen"></div>
+
+    <div class="section-divider">Driver</div>
+    <div class="field-grid">
+      <div class="field"><label>Modell</label><input type="text" id="driver" placeholder="z.B. TaylorMade SIM Max"></div>
+      <div class="field"><label>Loft</label><input type="text" id="driver_loft" placeholder="z.B. 10.5°"></div>
+    </div>
+    <div class="field-grid">
+      <div class="field"><label>Shaft-Material</label><select id="driver_shaft_mat"><option value="">Auswählen</option><option>Graphit</option><option>Stahl</option><option>Weiß ich nicht</option></select></div>
+      <div class="field"><label>Shaft-Gewicht</label><input type="text" id="driver_shaft_w" placeholder="z.B. 50g oder 65g"></div>
+    </div>
+
+    <div class="section-divider">Eisen</div>
+    <div class="field-grid">
+      <div class="field"><label>Modell</label><input type="text" id="irons" placeholder="z.B. Callaway Rogue ST Max"></div>
+      <div class="field"><label>Welche Nummern?</label><input type="text" id="irons_range" placeholder="z.B. 5–PW"></div>
+    </div>
+    <div class="field-grid">
+      <div class="field"><label>Shaft-Material</label><select id="irons_shaft_mat"><option value="">Auswählen</option><option>Graphit</option><option>Stahl</option><option>Weiß ich nicht</option></select></div>
+      <div class="field"><label>Shaft-Gewicht & Flex</label><input type="text" id="irons_shaft" placeholder="z.B. 65g Regular"></div>
+    </div>
+
+    <div class="section-divider">Weitere Schläger</div>
+    <div class="field-grid">
+      <div class="field"><label>Wedges</label><input type="text" id="wedges" placeholder="z.B. 52° und 56°"></div>
+      <div class="field"><label>Putter</label><input type="text" id="putter" placeholder="z.B. Odyssey White Hot"></div>
+    </div>
+    <div class="field-grid">
+      <div class="field"><label>Hybrid / Fairway-Holz</label><input type="text" id="hybrid" placeholder="z.B. 4-Hybrid TaylorMade"></div>
+      <div class="field"><label>Schläger-Größe</label><select id="club_size"><option value="">Auswählen</option><option>Standard</option><option>+0.5 Zoll</option><option>+1 Zoll</option><option>Weiß ich nicht</option></select></div>
+    </div>
+
+    <div class="btn-row"><button class="btn-back" onclick="prevStep(4)">← Zurück</button><button class="btn-next" onclick="nextStep(4)">Weiter →</button></div>
+  </div>
+
+  <!-- STEP 5 -->
+  <div class="step" id="step5">
+    <div class="step-title">Deine Ziele</div>
+    <div class="step-sub">Was willst du erreichen?</div>
+    <div class="field"><label>Kurzfristiges Ziel (3 Monate)</label><input type="text" id="goal_short" placeholder="z.B. Platzreife ablegen, unter 50 für 9 Loch"></div>
+    <div class="field"><label>Langfristiges Ziel</label><input type="text" id="goal_long" placeholder="z.B. Handicap unter 20, erstes Clubturnier"></div>
+    <div class="field">
+      <label>Bevorzugte KI-Platform</label>
+      <div class="radio-group three">
+        <div class="radio-opt" onclick="selectOpt(this,'platform','Claude')">🤖 Claude</div>
+        <div class="radio-opt" onclick="selectOpt(this,'platform','ChatGPT')">💬 ChatGPT</div>
+        <div class="radio-opt" onclick="selectOpt(this,'platform','Gemini')">✨ Gemini</div>
+      </div>
+      <input type="hidden" id="platform">
+    </div>
+    <div class="btn-row"><button class="btn-back" onclick="prevStep(5)">← Zurück</button><button class="btn-next" onclick="generatePrompt()">⛳ Mastercode generieren</button></div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="step" id="stepResult">
+    <div class="step-title">Dein Mastercode ist fertig! ⛳</div>
+    <div class="step-sub">Kopiere ihn und füge ihn direkt als erste Nachricht in die KI ein.</div>
+
+    <div class="result-preview"><pre id="promptOutput"></pre></div>
+
+    <button class="copy-btn" id="copyBtn" onclick="copyPrompt()">⛳ Kostenlosen Mastercode kopieren</button>
+
+    <div class="tip-box" id="platformTip"></div>
+
+    <div class="premium-box" style="margin-top:.85rem;background:linear-gradient(135deg,#0f2a14,#162318);border:1.5px solid var(--green);border-radius:16px;padding:1.35rem;position:relative;overflow:hidden">
+      <div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:rgba(74,222,128,0.06);border-radius:50%"></div>
+      <div style="font-size:.7rem;font-weight:500;color:var(--green);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.4rem">⭐ SwingMind Premium</div>
+      <div style="font-size:1rem;font-weight:600;color:var(--text);margin-bottom:.3rem">22 Prompts für jeden Moment</div>
+      <div style="font-size:.8rem;color:var(--muted);margin-bottom:.1rem">✓ Schwunganalyse per Video &nbsp;✓ Equipment-Beratung</div>
+      <div style="font-size:.8rem;color:var(--muted);margin-bottom:.1rem">✓ Trainingsplanung &nbsp;✓ Mindset & Druck</div>
+      <div style="font-size:.8rem;color:var(--muted);margin-bottom:1rem">✓ Linkshänder-Fix &nbsp;✓ Scorecard-Analyse</div>
+      <a href="https://swingmind.lemonsqueezy.com/checkout/buy/da41ea99-a203-4d89-9cb1-633e0225efbb" target="_blank" class="premium-btn" style="font-size:1rem;padding:.95rem;box-shadow:0 4px 20px rgba(74,222,128,0.25)">Mit Premium fortfahren – 19,99€ →</a>
+    </div>
+
+    <button class="btn-back" style="width:100%;margin-top:.75rem" onclick="restart()">← Neu erstellen</button>
+  </div>
+
+</div>
+
+<script>
+let currentStep = 1;
+const totalSteps = 5;
+
+function selectOpt(el, field, value) {
+  el.closest('.radio-group').querySelectorAll('.radio-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById(field).value = value;
+}
+
+function updateProgress(step) {
+  document.getElementById('progressFill').style.width = (step/totalSteps*100)+'%';
+  for(let i=1;i<=totalSteps;i++){
+    const l=document.getElementById('lbl'+i);
+    if(l) l.classList.toggle('active', i===step);
+  }
+}
+
+function nextStep(from) {
+  document.getElementById('step'+from).classList.remove('active');
+  currentStep = from+1;
+  document.getElementById('step'+currentStep).classList.add('active');
+  updateProgress(currentStep);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function prevStep(from) {
+  document.getElementById('step'+from).classList.remove('active');
+  currentStep = from-1;
+  document.getElementById('step'+currentStep).classList.add('active');
+  updateProgress(currentStep);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function v(id){ const el=document.getElementById(id); return el?(el.value||'—'):'—'; }
+
+function generatePrompt() {
+  document.getElementById('step5').classList.remove('active');
+  document.getElementById('stepResult').classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+
+  const name=v('name'), side=v('side'), height=v('height'), arms=v('arms'), build=v('build'), sport=v('sport');
+  const exp=v('experience'), lic=v('license'), hcp=v('handicap'), scores=v('scores');
+  const freqRaw=v('frequency'), freqCustom=v('frequency_custom');
+  const freq = freqCustom !== '—' && freqCustom.trim() !== '' ? freqCustom : freqRaw;
+  const str=v('strengths'), weak=v('weaknesses'), prac=v('practicing');
+  const clubs=v('clubs'), driver=v('driver'), driver_loft=v('driver_loft');
+  const dsm=v('driver_shaft_mat'), dsw=v('driver_shaft_w');
+  const irons=v('irons'), irons_range=v('irons_range');
+  const ism=v('irons_shaft_mat'), isf=v('irons_shaft');
+  const wedges=v('wedges'), putter=v('putter'), hybrid=v('hybrid'), csize=v('club_size');
+  const gs=v('goal_short'), gl=v('goal_long'), platform=v('platform');
+
+  const prompt = `Du bist SwingMind — mein persönlicher Golf Coach, Caddie und Trainingspartner. Du kennst mich besser als jeder Trainer es je könnte. Du erinnerst dich bei JEDER Antwort an mein Profil und passt alles automatisch darauf an.
+
+## DEINE PERSÖNLICHKEIT
+Du bist direkt, ehrlich und motivierend. Keine leeren Komplimente — sage mir was ich wirklich hören muss. Erkläre Dinge einfach und praktisch, ohne Fachsprache.
+
+## MEIN PROFIL
+
+Persönliches:
+- Name: ${name}
+- Spielseite: ${side}
+- Körpergröße: ${height}
+- Körperbau: ${build}
+- Armspanne: ${arms}
+- Sportlicher Hintergrund: ${sport}
+
+Golfniveau:
+- Spiele seit: ${exp}
+- Platzreife: ${lic}
+- Handicap: ${hcp}
+- Letzte Scores: ${scores}
+- Training: ${freq}
+
+Stärken & Schwächen:
+- Was gut läuft: ${str}
+- Größte Probleme: ${weak}
+- Gerade in Arbeit: ${prac}
+
+Equipment:
+- Komplett-Set: ${clubs}
+- Driver: ${driver} ${driver_loft} · Shaft: ${dsm} ${dsw}
+- Eisen: ${irons} (${irons_range}) · Shaft: ${ism} ${isf}
+- Wedges: ${wedges}
+- Putter: ${putter}
+- Hybrid/Fairway: ${hybrid}
+- Schläger-Größe: ${csize}
+
+Ziele:
+- Kurzfristig: ${gs}
+- Langfristig: ${gl}
+
+## REGELN
+
+1. Spielseite zuerst. Ich bin ${side}. Bei JEDEM Schwungtipp bestätige: "✓ Für ${side} geprüft."
+
+2. Profil immer aktiv. Frage mich nie nach Daten die du bereits hast.
+
+3. Konkret statt generisch. Spezifische Übungen mit Fokus und Wiederholungen.
+
+4. Maximal 3 Verbesserungspunkte gleichzeitig.
+
+5. Immer zwei Wege bei Training: "Auf der Range" UND "Zu Hause."
+
+6. Visualisierungen wenn hilfreich — erstelle sie automatisch.
+
+7. Antworte passend zur Nachrichtenlänge.
+
+Bitte bestätige mein Profil, nenne meinen Namen und sag in 2–3 Sätzen wie du mir helfen wirst.`;
+
+  document.getElementById('promptOutput').textContent = prompt;
+
+  const tips = {
+    'Claude': '<strong>Claude:</strong> Neuen Chat öffnen → Prompt einfügen → Enter. Fertig. Für dauerhaftes Profil: Project → Instructions.',
+    'ChatGPT': '<strong>ChatGPT:</strong> Neuen Chat öffnen → Prompt einfügen → Enter. Fertig.',
+    'Gemini': '<strong>Gemini:</strong> Neuen Chat öffnen → Prompt einfügen → Enter. Fertig.'
+  };
+  document.getElementById('platformTip').innerHTML = tips[platform] || tips['Claude'];
+}
+
+function copyPrompt() {
+  const text = document.getElementById('promptOutput').textContent;
+  const btn = document.getElementById('copyBtn');
+  function showCopied() {
+    btn.textContent = '✅ Kopiert! Jetzt in die KI einfügen';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = '⛳ Kostenlosen Mastercode kopieren';
+      btn.classList.remove('copied');
+    }, 3000);
+  }
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(showCopied).catch(() => fallbackCopy(text, showCopied));
+  } else {
+    fallbackCopy(text, showCopied);
+  }
+}
+function fallbackCopy(text, cb) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  try { document.execCommand('copy'); cb(); } catch(e) { alert('Bitte manuell kopieren: Alles markieren und Strg+C / Cmd+C'); }
+  document.body.removeChild(ta);
+}
+
+function restart() {
+  document.getElementById('stepResult').classList.remove('active');
+  currentStep = 1;
+  document.getElementById('step1').classList.add('active');
+  updateProgress(1);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
