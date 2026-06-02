@@ -56,6 +56,10 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:1.25re
 .btn-next:hover{opacity:.88;transform:translateY(-1px)}
 .btn-back{background:transparent;color:var(--muted);border:1px solid var(--gborder2);border-radius:100px;padding:.875rem 1.4rem;font-size:.975rem;font-weight:500;cursor:pointer;font-family:var(--sans);transition:all .2s}
 .btn-back:hover{border-color:var(--green);color:var(--green)}
+.field-error input,.field-error select,.field-error textarea{border-color:#f87171!important;box-shadow:0 0 0 3px rgba(248,113,113,0.15)!important}
+.field-error .radio-group{outline:2px solid #f87171;outline-offset:3px;border-radius:10px}
+.error-msg{color:#f87171;font-size:.8rem;margin-top:.4rem;display:none}
+.field-error .error-msg{display:block}
 
 /* RESULT */
 .result-preview{background:var(--bg2);border:1px solid var(--gborder);border-radius:12px;padding:1rem 1.25rem;margin-top:1.25rem;max-height:220px;overflow-y:auto;position:relative}
@@ -124,33 +128,24 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:1.25re
   <div class="step active" id="step1">
     <div class="step-title">Dein Profil</div>
     <div class="step-sub">Damit dein Coach dich von Anfang an kennt.</div>
-    <div class="field"><label>Dein Name</label><input type="text" id="name" placeholder="z.B. Max Mustermann"></div>
-    <div class="field">
-      <label>Spielseite</label>
-      <div class="radio-group">
-        <div class="radio-opt" onclick="selectOpt(this,'side','Rechtshänder')">⛳ Rechtshänder</div>
-        <div class="radio-opt" onclick="selectOpt(this,'side','Linkshänder')">⛳ Linkshänder</div>
-      </div>
-      <input type="hidden" id="side">
-    </div>
+    <div class="field" id="f_name"><label>Dein Name <span style="color:#f87171">*</span></label><input type="text" id="name" placeholder="z.B. Max Mustermann"><div class="error-msg">Bitte gib deinen Namen ein.</div></div>
+    <div class="field" id="f_side"><label>Spielseite <span style="color:#f87171">*</span></label><div class="radio-group"><div class="radio-opt" onclick="selectOpt(this,'side','Rechtshänder')">⛳ Rechtshänder</div><div class="radio-opt" onclick="selectOpt(this,'side','Linkshänder')">⛳ Linkshänder</div></div><input type="hidden" id="side"><div class="error-msg">Bitte wähle deine Spielseite.</div></div>
     <div class="field-grid">
-      <div class="field"><label>Körpergröße</label><input type="text" id="height" placeholder="z.B. 182 cm"></div>
-      <div class="field">
-        <label>Armspanne</label>
-        <select id="arms"><option value="">Auswählen</option><option>Normal</option><option>Lang</option><option>Kurz</option></select>
+      <div class="field" id="f_height"><label>Körpergröße <span style="color:#f87171">*</span></label><input type="text" id="height" placeholder="z.B. 182 cm"><div class="error-msg">Pflichtfeld.</div></div>
+      <div class="field" id="f_arms">
+        <label>Armspanne <span style="color:#f87171">*</span></label>
+        <select id="arms"><option value="">Auswählen</option><option>Normal</option><option>Lang</option><option>Kurz</option></select><div class="error-msg">Pflichtfeld.</div>
       </div>
     </div>
-    <div class="field">
-      <label>Körperbau</label>
+    <div class="field" id="f_build"><label>Körperbau <span style="color:#f87171">*</span></label>
       <div class="radio-group">
         <div class="radio-opt" onclick="selectOpt(this,'build','Athletisch')">💪 Athletisch</div>
         <div class="radio-opt" onclick="selectOpt(this,'build','Schlank')">🏃 Schlank</div>
         <div class="radio-opt" onclick="selectOpt(this,'build','Kräftig')">🏋️ Kräftig</div>
         <div class="radio-opt" onclick="selectOpt(this,'build','Normal')">👤 Normal</div>
       </div>
-      <input type="hidden" id="build">
-    </div>
-    <div class="field"><label>Sportlicher Hintergrund</label><input type="text" id="sport" placeholder="z.B. Fußball, Fitness, Tennis"></div>
+      <input type="hidden" id="build"><div class="error-msg">Pflichtfeld.</div></div>
+    <div class="field" id="f_sport"><label>Sportlicher Hintergrund <span style="color:#f87171">*</span></label><input type="text" id="sport" placeholder="z.B. Fußball, Fitness, Tennis"><div class="error-msg">Pflichtfeld.</div></div>
     <div class="btn-row"><button class="btn-next" onclick="nextStep(1)">Weiter →</button></div>
   </div>
 
@@ -160,31 +155,26 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:1.25re
     <div class="step-sub">Damit dein Coach weiß wo du stehst.</div>
     <div class="field">
       <label>Wie lange spielst du schon?</label>
-      <select id="experience"><option value="">Auswählen</option><option>Weniger als 6 Monate</option><option>6–12 Monate</option><option>1–2 Jahre</option><option>2–5 Jahre</option><option>Mehr als 5 Jahre</option></select>
-    </div>
-    <div class="field">
-      <label>Platzreife</label>
+      <select id="experience" style=""><option value="">Auswählen</option><option>Weniger als 6 Monate</option><option>6–12 Monate</option><option>1–2 Jahre</option><option>2–5 Jahre</option><option>Mehr als 5 Jahre</option></select><div class="error-msg">Bitte wähle deine Erfahrung.</div></div>
+    <div class="field" id="f_license"><label>Platzreife <span style="color:#f87171">*</span></label>
       <div class="radio-group three">
         <div class="radio-opt" onclick="selectOpt(this,'license','Ja')">✅ Ja</div>
         <div class="radio-opt" onclick="selectOpt(this,'license','Nein')">❌ Nein</div>
         <div class="radio-opt" onclick="selectOpt(this,'license','In Vorbereitung')">📚 In Vorb.</div>
       </div>
-      <input type="hidden" id="license">
-    </div>
+      <input type="hidden" id="license"><div class="error-msg">Bitte wähle eine Option.</div></div>
     <div class="field-grid">
-      <div class="field"><label>Handicap (falls vorhanden)</label><input type="text" id="handicap" placeholder="z.B. 36 oder keins"></div>
-      <div class="field"><label>Letzte Scores</label><input type="text" id="scores" placeholder="z.B. 54 / 58 / 51 für 9 Loch"></div>
+      <div class="field" id="f_handicap"><label>Handicap <span style="color:#f87171">*</span></label><input type="text" id="handicap" placeholder="z.B. 36 oder keins"><div class="error-msg">Pflichtfeld.</div></div>
+      <div class="field" id="f_scores"><label>Letzte Scores <span style="color:#f87171">*</span></label><input type="text" id="scores" placeholder="z.B. 54 / 58 / 51 für 9 Loch"><div class="error-msg">Pflichtfeld.</div></div>
     </div>
-    <div class="field">
-      <label>Trainingsfrequenz</label>
+    <div class="field" id="f_frequency"><label>Trainingsfrequenz <span style="color:#f87171">*</span></label>
       <div class="radio-group">
         <div class="radio-opt" onclick="selectOpt(this,'frequency','1x pro Woche')">1x / Woche</div>
         <div class="radio-opt" onclick="selectOpt(this,'frequency','2x pro Woche')">2x / Woche</div>
         <div class="radio-opt" onclick="selectOpt(this,'frequency','3x+ pro Woche')">3x+ / Woche</div>
         <div class="radio-opt" onclick="selectOpt(this,'frequency','Unregelmäßig')">Unregelmäßig</div>
       </div>
-      <input type="hidden" id="frequency">
-    </div>
+      <input type="hidden" id="frequency"><div class="error-msg">Pflichtfeld.</div></div>
     <div class="field"><label>Oder selbst angeben</label><input type="text" id="frequency_custom" placeholder="z.B. 2x Range, 1x Platz pro Monat"></div>
     <div class="btn-row"><button class="btn-back" onclick="prevStep(2)">← Zurück</button><button class="btn-next" onclick="nextStep(2)">Weiter →</button></div>
   </div>
@@ -193,9 +183,9 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:1.25re
   <div class="step" id="step3">
     <div class="step-title">Stärken & Schwächen</div>
     <div class="step-sub">Ehrlichkeit hilft deinem Coach mehr als du denkst.</div>
-    <div class="field"><label>Was läuft gut?</label><input type="text" id="strengths" placeholder="z.B. Putting, kurze Eisen"></div>
-    <div class="field"><label>Größte Probleme</label><input type="text" id="weaknesses" placeholder="z.B. Abschlag, Bunker, Toppen"></div>
-    <div class="field"><label>Was übst du gerade gezielt?</label><input type="text" id="practicing" placeholder="z.B. Körperrotation, Griff, Gewichtsverlagerung"></div>
+    <div class="field" id="f_strengths"><label>Was läuft gut? <span style="color:#f87171">*</span></label><input type="text" id="strengths" placeholder="z.B. Putting, kurze Eisen"><div class="error-msg">Pflichtfeld.</div></div>
+    <div class="field" id="f_weaknesses"><label>Größte Probleme <span style="color:#f87171">*</span></label><input type="text" id="weaknesses" placeholder="z.B. Abschlag, Bunker, Toppen"><div class="error-msg">Pflichtfeld.</div></div>
+    <div class="field" id="f_practicing"><label>Was übst du gerade gezielt? <span style="color:#f87171">*</span></label><input type="text" id="practicing" placeholder="z.B. Körperrotation, Griff, Gewichtsverlagerung"><div class="error-msg">Pflichtfeld.</div></div>
     <div class="btn-row"><button class="btn-back" onclick="prevStep(3)">← Zurück</button><button class="btn-next" onclick="nextStep(3)">Weiter →</button></div>
   </div>
 
@@ -244,17 +234,14 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:1.25re
   <div class="step" id="step5">
     <div class="step-title">Deine Ziele</div>
     <div class="step-sub">Was willst du erreichen?</div>
-    <div class="field"><label>Kurzfristiges Ziel (3 Monate)</label><input type="text" id="goal_short" placeholder="z.B. Platzreife ablegen, unter 50 für 9 Loch"></div>
-    <div class="field"><label>Langfristiges Ziel</label><input type="text" id="goal_long" placeholder="z.B. Handicap unter 20, erstes Clubturnier"></div>
-    <div class="field">
-      <label>Bevorzugte KI-Platform</label>
-      <div class="radio-group three">
+    <div class="field" id="f_goal_short"><label>Kurzfristiges Ziel (3 Monate) <span style="color:#f87171">*</span></label><input type="text" id="goal_short" placeholder="z.B. Platzreife ablegen, unter 50 für 9 Loch"><div class="error-msg">Pflichtfeld.</div></div>
+    <div class="field" id="f_goal_long"><label>Langfristiges Ziel <span style="color:#f87171">*</span></label><input type="text" id="goal_long" placeholder="z.B. Handicap unter 20, erstes Clubturnier"><div class="error-msg">Pflichtfeld.</div></div>
+    <div class="field" id="f_platform"><label>Bevorzugte KI-Platform <span style="color:#f87171">*</span></label><div class="radio-group three">
         <div class="radio-opt" onclick="selectOpt(this,'platform','Claude')">🤖 Claude</div>
         <div class="radio-opt" onclick="selectOpt(this,'platform','ChatGPT')">💬 ChatGPT</div>
         <div class="radio-opt" onclick="selectOpt(this,'platform','Gemini')">✨ Gemini</div>
       </div>
-      <input type="hidden" id="platform">
-    </div>
+      <input type="hidden" id="platform"><div class="error-msg">Bitte wähle deine KI-Platform.</div></div>
     <div class="btn-row"><button class="btn-back" onclick="prevStep(5)">← Zurück</button><button class="btn-next" onclick="generatePrompt()">⛳ Mastercode generieren</button></div>
   </div>
 
@@ -302,7 +289,58 @@ function updateProgress(step) {
   }
 }
 
+function clearErrors() {
+  document.querySelectorAll('.field-error').forEach(el => el.classList.remove('field-error'));
+}
+
+function showError(fieldId) {
+  const el = document.getElementById(fieldId);
+  if (el) el.classList.add('field-error');
+}
+
+function validate(step) {
+  clearErrors();
+  let valid = true;
+  const req = (id, fid) => {
+    const el = document.getElementById(id);
+    if (!el || !el.value.trim()) { showError(fid); valid = false; }
+  };
+  if (step === 1) {
+    req('name','f_name');
+    if (!document.getElementById('side').value) { showError('f_side'); valid = false; }
+    req('height','f_height');
+    if (!document.getElementById('arms').value) { showError('f_arms'); valid = false; }
+    if (!document.getElementById('build').value) { showError('f_build'); valid = false; }
+    req('sport','f_sport');
+  }
+  if (step === 2) {
+    if (!document.getElementById('experience').value) { showError('f_experience'); valid = false; }
+    if (!document.getElementById('license').value) { showError('f_license'); valid = false; }
+    req('handicap','f_handicap');
+    req('scores','f_scores');
+    const freq = document.getElementById('frequency').value;
+    const freqC = document.getElementById('frequency_custom').value;
+    if (!freq && !freqC.trim()) { showError('f_frequency'); valid = false; }
+  }
+  if (step === 3) {
+    req('strengths','f_strengths');
+    req('weaknesses','f_weaknesses');
+    req('practicing','f_practicing');
+  }
+  if (step === 5) {
+    req('goal_short','f_goal_short');
+    req('goal_long','f_goal_long');
+    if (!document.getElementById('platform').value) { showError('f_platform'); valid = false; }
+  }
+  if (!valid) {
+    const firstErr = document.querySelector('.field-error');
+    if (firstErr) firstErr.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+  return valid;
+}
+
 function nextStep(from) {
+  if (!validate(from)) return;
   document.getElementById('step'+from).classList.remove('active');
   currentStep = from+1;
   document.getElementById('step'+currentStep).classList.add('active');
@@ -321,9 +359,18 @@ function prevStep(from) {
 function v(id){ const el=document.getElementById(id); return el?(el.value||'—'):'—'; }
 
 function generatePrompt() {
+  if (!validate(5)) return;
   document.getElementById('step5').classList.remove('active');
   document.getElementById('stepResult').classList.add('active');
   window.scrollTo({top:0,behavior:'smooth'});
+
+  // Save profile to localStorage for Premium
+  const profileData = {};
+  ['name','side','height','arms','build','sport','experience','license','handicap','scores','frequency','frequency_custom','strengths','weaknesses','practicing','clubs','driver','driver_loft','driver_shaft_mat','driver_shaft_w','irons','irons_range','irons_shaft_mat','irons_shaft','wedges','putter','hybrid','club_size','goal_short','goal_long','platform'].forEach(k => {
+    const el = document.getElementById(k);
+    if(el) profileData[k] = el.value || '';
+  });
+  localStorage.setItem('swingmind_profile', JSON.stringify(profileData));
 
   const name=v('name'), side=v('side'), height=v('height'), arms=v('arms'), build=v('build'), sport=v('sport');
   const exp=v('experience'), lic=v('license'), hcp=v('handicap'), scores=v('scores');

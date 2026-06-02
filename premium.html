@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SwingMind Premium</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080f0a;--bg2:#0f1f12;--bg3:#162318;
+  --green:#4ade80;--green-dim:rgba(74,222,128,0.1);
+  --gborder:rgba(74,222,128,0.15);--gborder2:rgba(74,222,128,0.3);
+  --text:#f0faf2;--muted:#7aad86;
+  --serif:'Syne',sans-serif;--sans:'DM Sans',sans-serif;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.7;min-height:100vh}
+nav{display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.75rem;border-bottom:1px solid var(--gborder);position:sticky;top:0;background:rgba(8,15,10,0.95);backdrop-filter:blur(12px);z-index:100}
+.logo{font-family:var(--serif);font-size:1.15rem;font-weight:800;letter-spacing:-0.02em;text-decoration:none;color:var(--text)}
+.logo span{color:var(--green)}
+.badge{background:var(--green);color:#080f0a;font-size:.7rem;font-weight:500;padding:.2rem .6rem;border-radius:100px}
+
+/* UNLOCK */
+#unlockScreen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;padding:2rem 1.5rem;text-align:center}
+.unlock-icon{font-size:3rem;margin-bottom:1.5rem}
+.unlock-title{font-family:var(--serif);font-size:1.75rem;font-weight:800;letter-spacing:-0.02em;margin-bottom:.5rem}
+.unlock-sub{color:var(--muted);font-size:.9rem;margin-bottom:2rem;max-width:320px}
+.code-input{width:100%;max-width:320px;background:var(--bg2);border:1px solid var(--gborder2);border-radius:12px;padding:.85rem 1.1rem;color:var(--text);font-family:var(--sans);font-size:1.1rem;text-align:center;letter-spacing:.15em;outline:none;margin-bottom:.75rem;transition:border-color .2s}
+.code-input:focus{border-color:var(--green)}
+.unlock-btn{width:100%;max-width:320px;background:var(--green);color:#080f0a;border:none;border-radius:100px;padding:.9rem;font-size:1rem;font-weight:500;cursor:pointer;font-family:var(--sans);transition:opacity .2s}
+.unlock-btn:hover{opacity:.88}
+.unlock-err{color:#f87171;font-size:.85rem;margin-top:.5rem;display:none}
+.unlock-link{margin-top:1.25rem;font-size:.82rem;color:var(--muted)}
+.unlock-link a{color:var(--green);text-decoration:none}
+
+/* MAIN */
+#mainScreen{display:none;max-width:600px;margin:0 auto;padding:2rem 1.5rem 4rem}
+.main-title{font-family:var(--serif);font-size:1.4rem;font-weight:800;letter-spacing:-0.02em;margin-bottom:.4rem}
+.main-sub{color:var(--muted);font-size:.875rem;margin-bottom:2rem}
+
+/* PROFILE CARD */
+.profile-card{background:var(--bg2);border:1px solid var(--gborder);border-radius:14px;padding:1.1rem 1.25rem;margin-bottom:1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.profile-info h3{font-size:.95rem;font-weight:500;margin-bottom:.2rem}
+.profile-info p{font-size:.8rem;color:var(--muted)}
+.profile-edit{font-size:.8rem;color:var(--green);text-decoration:none;white-space:nowrap}
+.no-profile{background:var(--bg2);border:1px solid var(--gborder2);border-radius:14px;padding:1.25rem;text-align:center;margin-bottom:1.5rem}
+.no-profile p{font-size:.875rem;color:var(--muted);margin-bottom:.75rem}
+.no-profile a{color:var(--green);font-size:.875rem;font-weight:500;text-decoration:none;background:var(--green-dim);padding:.5rem 1.25rem;border-radius:100px;border:1px solid var(--gborder2)}
+
+/* WHAT YOU GET */
+.features{display:flex;flex-direction:column;gap:.6rem;margin-bottom:1.75rem}
+.feature{display:flex;align-items:flex-start;gap:.75rem;background:var(--bg2);border:1px solid var(--gborder);border-radius:12px;padding:.9rem 1rem}
+.feature-icon{font-size:1.2rem;flex-shrink:0;margin-top:.1rem}
+.feature-text h4{font-size:.875rem;font-weight:500;margin-bottom:.1rem}
+.feature-text p{font-size:.78rem;color:var(--muted)}
+
+/* GENERATE BTN */
+.gen-btn{width:100%;background:var(--green);color:#080f0a;border:none;border-radius:100px;padding:1rem;font-size:1rem;font-weight:500;cursor:pointer;font-family:var(--sans);transition:opacity .2s,transform .15s;margin-bottom:.75rem}
+.gen-btn:hover{opacity:.88;transform:translateY(-1px)}
+
+/* RESULT */
+#resultSection{display:none;margin-top:1.5rem}
+.result-label{font-size:.78rem;font-weight:500;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;margin-bottom:.5rem}
+.result-box{background:var(--bg2);border:1px solid var(--gborder);border-radius:12px;padding:1rem 1.25rem;max-height:240px;overflow-y:auto;margin-bottom:1rem}
+.result-box pre{white-space:pre-wrap;word-break:break-word;font-family:var(--sans);font-size:.8rem;line-height:1.65;color:var(--muted)}
+.result-box::-webkit-scrollbar{width:3px}
+.result-box::-webkit-scrollbar-thumb{background:var(--gborder2);border-radius:2px}
+.copy-btn{width:100%;background:var(--green);color:#080f0a;border:none;border-radius:100px;padding:.9rem;font-size:1rem;font-weight:500;cursor:pointer;font-family:var(--sans);transition:opacity .2s;display:flex;align-items:center;justify-content:center;gap:.5rem}
+.copy-btn:hover{opacity:.88}
+.copy-btn.copied{background:var(--bg3);color:var(--green);border:1px solid var(--green)}
+.how-to{background:var(--bg3);border:1px solid var(--gborder2);border-radius:12px;padding:1rem 1.1rem;margin-top:.85rem}
+.how-to h4{font-size:.85rem;font-weight:500;color:var(--green);margin-bottom:.5rem}
+.how-to p{font-size:.8rem;color:var(--muted);line-height:1.6}
+.how-to strong{color:var(--text)}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo"><span>Swing</span>Mind</a>
+  <span class="badge">⭐ Premium</span>
+</nav>
+
+<!-- UNLOCK -->
+<div id="unlockScreen">
+  <div class="unlock-icon">⭐</div>
+  <div class="unlock-title">SwingMind Premium</div>
+  <div class="unlock-sub">Gib deinen Zugangscode ein der dir nach dem Kauf per E-Mail geschickt wurde.</div>
+  <input class="code-input" type="text" id="codeInput" placeholder="*******" maxlength="12" oninput="this.value=this.value.toUpperCase()">
+  <button class="unlock-btn" onclick="unlock()">Freischalten →</button>
+  <div class="unlock-err" id="unlockErr">Ungültiger Code — überprüfe deine Bestätigungs-E-Mail.</div>
+  <div class="unlock-link">Noch kein Premium? <a href="https://swingmind.lemonsqueezy.com/checkout/buy/da41ea99-a203-4d89-9cb1-633e0225efbb" target="_blank">Jetzt kaufen →</a></div>
+</div>
+
+<!-- MAIN -->
+<div id="mainScreen">
+  <div class="main-title">Dein Premium Mastercode ⭐</div>
+  <div class="main-sub">Einmal generieren, einmal einfügen — dein Coach mit vollem Menü ist bereit.</div>
+
+  <div id="profileSection"></div>
+
+  <button class="gen-btn" onclick="generatePremium()">⭐ Premium Mastercode generieren</button>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:.55rem;margin-bottom:1.5rem">
+    <div style="background:var(--bg2);border:1px solid var(--gborder);border-radius:10px;padding:.75rem .85rem;display:flex;align-items:center;gap:.6rem">
+      <span style="font-size:1rem">🗂️</span><span style="font-size:.75rem;color:var(--muted)">6 Kategorien als Menü</span>
+    </div>
+    <div style="background:var(--bg2);border:1px solid var(--gborder);border-radius:10px;padding:.75rem .85rem;display:flex;align-items:center;gap:.6rem">
+      <span style="font-size:1rem">📋</span><span style="font-size:.75rem;color:var(--muted)">22 Coaching-Szenarien</span>
+    </div>
+    <div style="background:var(--bg2);border:1px solid var(--gborder);border-radius:10px;padding:.75rem .85rem;display:flex;align-items:center;gap:.6rem">
+      <span style="font-size:1rem">📊</span><span style="font-size:.75rem;color:var(--muted)">Handicap-Tracker</span>
+    </div>
+    <div style="background:var(--bg2);border:1px solid var(--gborder);border-radius:10px;padding:.75rem .85rem;display:flex;align-items:center;gap:.6rem">
+      <span style="font-size:1rem">💡</span><span style="font-size:.75rem;color:var(--muted)">"Menü" jederzeit</span>
+    </div>
+  </div>
+
+  <div id="resultSection">
+    <div class="result-label">Dein Premium Mastercode</div>
+    <div class="result-box"><pre id="premiumOutput"></pre></div>
+    <button class="copy-btn" id="copyBtn" onclick="copyCode()">⛳ Mastercode kopieren</button>
+    <div class="how-to">
+      <h4>So geht's weiter:</h4>
+      <p><strong>1.</strong> Öffne ChatGPT, Claude oder Gemini<br>
+      <strong>2.</strong> Starte einen neuen Chat<br>
+      <strong>3.</strong> Füge den Mastercode als erste Nachricht ein<br>
+      <strong>4.</strong> Dein Coach zeigt dir sofort das Menü<br><br>
+      <strong>Tipp für dauerhaften Zugang:</strong> Bei Claude → neues Project → Project Instructions → Mastercode einfügen. Dann erscheint das Menü bei jedem Chat automatisch ohne Copy-Paste.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+async function unlock() {
+  const btn = document.querySelector('.unlock-btn');
+  const err = document.getElementById('unlockErr');
+  const key = document.getElementById('codeInput').value.trim();
+  
+  if (!key) {
+    err.textContent = 'Bitte gib deinen Zugangscode ein.';
+    err.style.display = 'block';
+    return;
+  }
+
+  btn.textContent = 'Überprüfe Code...';
+  btn.disabled = true;
+  err.style.display = 'none';
+
+  try {
+    const res = await fetch('https://api.lemonsqueezy.com/v1/licenses/activate', {
+      method: 'POST',
+      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ license_key: key, instance_name: 'SwingMind Premium' })
+    });
+    const data = await res.json();
+
+    if (data.activated) {
+      localStorage.setItem('swingmind_unlocked', '1');
+      localStorage.setItem('swingmind_license_key', key);
+      localStorage.setItem('swingmind_instance_id', data.instance.id);
+      showMain();
+    } else {
+      err.textContent = data.error || 'Ungültiger Code — überprüfe deine Bestätigungs-E-Mail.';
+      err.style.display = 'block';
+      btn.textContent = 'Freischalten →';
+      btn.disabled = false;
+    }
+  } catch(e) {
+    err.textContent = 'Verbindungsfehler — bitte versuche es nochmal.';
+    err.style.display = 'block';
+    btn.textContent = 'Freischalten →';
+    btn.disabled = false;
+  }
+}
+
+document.getElementById('codeInput').addEventListener('keydown', e => { if(e.key==='Enter') unlock(); });
+
+async function validateExisting() {
+  const key = localStorage.getItem('swingmind_license_key');
+  const instanceId = localStorage.getItem('swingmind_instance_id');
+  if (!key || !instanceId) return false;
+  try {
+    const res = await fetch('https://api.lemonsqueezy.com/v1/licenses/validate', {
+      method: 'POST',
+      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ license_key: key, instance_id: instanceId })
+    });
+    const data = await res.json();
+    return data.valid === true;
+  } catch(e) {
+    // If offline, trust localStorage
+    return true;
+  }
+}
+
+function showMain() {
+  document.getElementById('unlockScreen').style.display = 'none';
+  document.getElementById('mainScreen').style.display = 'block';
+  loadProfileCard();
+}
+
+function loadProfileCard() {
+  const saved = localStorage.getItem('swingmind_profile');
+  const sec = document.getElementById('profileSection');
+  if (saved) {
+    const p = JSON.parse(saved);
+    const name = p.name || '—';
+    const side = p.side || '—';
+    const hcp = p.handicap || 'keins';
+    sec.innerHTML = `<div class="profile-card">
+      <div class="profile-info">
+        <h3>${name} · ${side}</h3>
+        <p>Handicap: ${hcp} · ${p.experience || '—'}</p>
+      </div>
+      <a href="generator.html" class="profile-edit">Profil ändern →</a>
+    </div>`;
+  } else {
+    sec.innerHTML = `<div class="no-profile">
+      <p>Kein Profil gefunden. Fülle zuerst den Fragebogen aus damit dein Mastercode personalisiert wird.</p>
+      <a href="generator.html">Zum Fragebogen →</a>
+    </div>`;
+  }
+}
+
+function p(key) {
+  const saved = localStorage.getItem('swingmind_profile');
+  if (!saved) return '—';
+  return JSON.parse(saved)[key] || '—';
+}
+
+function generatePremium() {
+  const name = p('name'), side = p('side'), height = p('height'), arms = p('arms');
+  const build = p('build'), sport = p('sport'), exp = p('experience');
+  const lic = p('license'), hcp = p('handicap'), scores = p('scores');
+  const freqR = p('frequency'), freqC = p('frequency_custom');
+  const freq = freqC !== '—' && freqC.trim() ? freqC : freqR;
+  const str = p('strengths'), weak = p('weaknesses'), prac = p('practicing');
+  const clubs = p('clubs'), driver = p('driver'), dsm = p('driver_shaft_mat');
+  const dsw = p('driver_shaft_w'), dloft = p('driver_loft');
+  const irons = p('irons'), ir = p('irons_range'), ism = p('irons_shaft_mat'), isf = p('irons_shaft');
+  const wedges = p('wedges'), putter = p('putter'), hybrid = p('hybrid'), csize = p('club_size');
+  const gs = p('goal_short'), gl = p('goal_long');
+
+  const mastercode = `Du bist SwingMind — mein persönlicher Golf Coach, Caddie und Trainingspartner. Du kennst mich besser als jeder Trainer. Du erinnerst dich bei JEDER Antwort an mein Profil und passt alles automatisch darauf an.
+
+## DEINE PERSÖNLICHKEIT
+Direkt, ehrlich, motivierend. Keine leeren Komplimente. Einfache Sprache, konkrete Tipps. Du freust dich über meine Fortschritte und sagst mir was ich wirklich hören muss.
+
+## MEIN PROFIL
+- Name: ${name} | Spielseite: ${side}
+- Größe: ${height} | Körperbau: ${build} | Armspanne: ${arms}
+- Sport-Hintergrund: ${sport}
+- Golf seit: ${exp} | Platzreife: ${lic} | Handicap: ${hcp}
+- Letzte Scores: ${scores} | Training: ${freq}
+- Stärken: ${str}
+- Schwächen: ${weak}
+- Aktuell in Arbeit: ${prac}
+- Set: ${clubs}
+- Driver: ${driver} ${dloft} · ${dsm} ${dsw}
+- Eisen: ${irons} (${ir}) · ${ism} ${isf}
+- Wedges: ${wedges} | Putter: ${putter} | Hybrid: ${hybrid}
+- Schläger-Größe: ${csize}
+- Kurzfristiges Ziel: ${gs}
+- Langfristiges Ziel: ${gl}
+
+## COACHING-REGELN
+1. Spielseite: Ich bin ${side}. Bei jedem Schwungtipp bestätige: "✓ Für ${side} geprüft."
+2. Profil aktiv: Frag mich nie nach Daten die du bereits kennst.
+3. Konkret: Spezifische Übungen mit Fokus — keine generischen Tipps.
+4. Max 3 Verbesserungspunkte gleichzeitig.
+5. Immer zwei Wege: "Auf der Range" UND "Zu Hause."
+6. Antwortlänge passend zur Nachricht — kurze Frage = kurze Antwort.
+
+## HANDICAP TRACKER
+Wenn ich dir eine gespielte Runde mitteile, frage am Ende automatisch:
+"Soll ich dein geschätztes Handicap basierend auf dieser Runde aktualisieren? (Ja/Nein)"
+Falls Ja: Berechne einen geschätzten Wert basierend auf meinen letzten Scores und dieser Runde. Kein offizielles System — eine ehrliche Einschätzung reicht.
+
+## MENÜ-SYSTEM ⭐
+Bei JEDEM Gesprächsbeginn und wenn ich "Hi", "Hey", "Hallo", "Menü", "Start" oder Ähnliches schreibe, zeige sofort dieses Menü:
+
+---
+Hey ${name}! Dein Golf Coach ist bereit. ⛳
+
+Was möchtest du heute machen?
+
+1. 🏋️ Training
+2. 📹 Schwunganalyse
+3. 📊 Analyse & Fortschritt
+4. 🏑 Equipment
+5. ⛳ Auf dem Platz
+6. 🧠 Mindset & Planung
+
+Antworte mit einer Zahl — oder schreib einfach drauflos.
+---
+
+Wenn ich eine Zahl eingebe, zeige die Unterpunkte:
+
+1 → Training:
+  1. Trainingsplan erstellen
+  2. Übungsplatz-Session planen
+  3. Warm-Up vor der Runde
+  4. Fitness für Golf
+  5. Schlechte Angewohnheit loswerden
+
+2 → Schwunganalyse:
+  1. Schwungvideo analysieren (Video hochladen)
+  2. Zwei Videos vergleichen
+
+3 → Analyse & Fortschritt:
+  1. Aktuelle Runde auswerten
+  2. Mehrere Runden analysieren
+  3. Jahresrückblick & neue Saison
+
+4 → Equipment:
+  1. Schläger kaufen / analysieren
+  2. Set vervollständigen
+  3. Gebrauchtkauf checken
+
+5 → Auf dem Platz:
+  1. Platz-Strategie
+  2. Wind & Bedingungen anpassen
+  3. Regelkunde
+
+6 → Mindset & Planung:
+  1. Nervosität & Druck
+  2. Nach einer schlechten Runde
+  3. Handicap-Roadmap
+  4. Saisonplanung
+
+Wenn ich einen Unterpunkt wähle, stelle mir nur die nötigsten Fragen — du kennst mein Profil bereits.
+
+## WICHTIG
+Beende JEDE Antwort mit dieser Zeile:
+💡 Schreib "Menü" um die Kategorien wieder zu sehen.
+
+Bitte bestätige jetzt kurz dass du bereit bist, nenne meinen Namen und zeige das Menü.`;
+
+  document.getElementById('premiumOutput').textContent = mastercode;
+  document.getElementById('resultSection').style.display = 'block';
+  document.getElementById('resultSection').scrollIntoView({behavior:'smooth'});
+}
+
+function copyCode() {
+  const text = document.getElementById('premiumOutput').textContent;
+  const btn = document.getElementById('copyBtn');
+  function showCopied() {
+    btn.textContent = '✅ Kopiert! Jetzt in die KI einfügen';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '⛳ Mastercode kopieren'; btn.classList.remove('copied'); }, 3000);
+  }
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(showCopied).catch(() => fallback(text, showCopied));
+  } else { fallback(text, showCopied); }
+}
+
+function fallback(text, cb) {
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
+  document.body.appendChild(ta); ta.focus(); ta.select();
+  try { document.execCommand('copy'); cb(); } catch(e) {}
+  document.body.removeChild(ta);
+}
+
+window.addEventListener('load', async () => {
+  if (localStorage.getItem('swingmind_unlocked') === '1') {
+    const valid = await validateExisting();
+    if (valid) {
+      showMain();
+    } else {
+      localStorage.removeItem('swingmind_unlocked');
+      localStorage.removeItem('swingmind_license_key');
+      localStorage.removeItem('swingmind_instance_id');
+    }
+  }
+});
+</script>
+</body>
+</html>
