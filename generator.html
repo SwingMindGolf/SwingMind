@@ -469,6 +469,14 @@ function copyPrompt() {
     fallbackCopy(text, showCopied);
   }
 }
+// Hide premium box if already unlocked
+window.addEventListener('load', () => {
+  if (localStorage.getItem('swingmind_unlocked') === '1') {
+    const premiumBox = document.querySelector('.premium-box');
+    if (premiumBox) premiumBox.style.display = 'none';
+  }
+});
+
 function fallbackCopy(text, cb) {
   const ta = document.createElement('textarea');
   ta.value = text;
