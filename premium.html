@@ -301,13 +301,13 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:1.1rem
 
     <div class="section-divider">Platzkunde</div>
     <div class="field">
-      <label>Schwierigste Situation</label>
-      <div class="radio-group"><div class="radio-opt" onclick="selectOpt(this,'hard_sit','Wasserhindernisse')">💧 Wasser</div><div class="radio-opt" onclick="selectOpt(this,'hard_sit','Enge Fairways')">🌿 Fairways</div><div class="radio-opt" onclick="selectOpt(this,'hard_sit','Bunker')">🏖️ Bunker</div><div class="radio-opt" onclick="selectOpt(this,'hard_sit','Rough')">🌱 Rough</div></div>
+      <label>Schwierigste Situation auf dem Platz</label>
+      <div class="radio-group"><div class="radio-opt" onclick="selectOpt(this,'hard_sit','Wasserhindernis')">💧 Wasserhindernis</div><div class="radio-opt" onclick="selectOpt(this,'hard_sit','Enge Fairways')">🌿 Fairways</div><div class="radio-opt" onclick="selectOpt(this,'hard_sit','Bunker')">🏖️ Bunker</div><div class="radio-opt" onclick="selectOpt(this,'hard_sit','Rough')">🌱 Rough</div></div>
       <input type="hidden" id="hard_sit">
     </div>
     <div class="field">
-      <label>Umgang mit Wind</label>
-      <div class="radio-group three"><div class="radio-opt" onclick="selectOpt(this,'wind_exp','Ignoriere ihn meistens')">😅 Ignoriere</div><div class="radio-opt" onclick="selectOpt(this,'wind_exp','Passe Schläger an')">🎯 Passe an</div><div class="radio-opt" onclick="selectOpt(this,'wind_exp','Weiß nicht wie')">❓ Weiß nicht</div></div>
+      <label>Wie gehst du mit Wind um?</label>
+      <div class="radio-group three"><div class="radio-opt" onclick="selectOpt(this,'wind_exp','Ignoriere ihn meistens')">😅 Ignoriere ihn</div><div class="radio-opt" onclick="selectOpt(this,'wind_exp','Passe Schläger an')">🎯 Passe an</div><div class="radio-opt" onclick="selectOpt(this,'wind_exp','Weiß nicht wie')">❓ Weiß nicht</div></div>
       <input type="hidden" id="wind_exp">
     </div>
 
@@ -613,6 +613,14 @@ function restartPremium(){
   if(hasProfile){document.getElementById('step6').classList.add('active');}
   else{document.getElementById('step1').classList.add('active');currentStep=1;updateProgress(1);}
   window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function accToggle(id) {
+  const panel = document.getElementById('acc-'+id);
+  const icon = document.getElementById('acc-icon-'+id);
+  const isOpen = panel.style.display !== 'none' && panel.style.display !== '';
+  panel.style.display = isOpen ? 'none' : 'grid';
+  icon.style.transform = isOpen ? '' : 'rotate(180deg)';
 }
 
 window.addEventListener('load', async()=>{
