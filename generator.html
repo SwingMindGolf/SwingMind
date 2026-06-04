@@ -469,11 +469,20 @@ function copyPrompt() {
     fallbackCopy(text, showCopied);
   }
 }
-// Hide premium box if already unlocked
 window.addEventListener('load', () => {
-  if (localStorage.getItem('swingmind_unlocked') === '1') {
+  const fromPremium = new URLSearchParams(window.location.search).get('from') === 'premium';
+  const isPremium = localStorage.getItem('swingmind_unlocked') === '1';
+  
+  if (fromPremium || isPremium) {
     const premiumBox = document.querySelector('.premium-box');
-    if (premiumBox) premiumBox.style.display = 'none';
+    if (premiumBox) {
+      premiumBox.innerHTML = `
+        <div style="font-size:.7rem;font-weight:500;color:var(--green);letter-spacing:.07em;text-transform:uppercase;margin-bottom:.4rem">⭐ Du bist Premium</div>
+        <div style="font-size:.95rem;font-weight:500;color:var(--text);margin-bottom:.3rem">Profil aktualisiert?</div>
+        <div style="font-size:.82rem;color:var(--muted);margin-bottom:.85rem">Weiter zu den Premium Extras um deinen neuen Mastercode zu generieren.</div>
+        <a href="premium.html" style="display:block;text-align:center;background:var(--green);color:#080f0a;border:none;border-radius:100px;padding:.875rem;font-size:.975rem;font-weight:500;text-decoration:none;transition:opacity .2s">Weiter zu Premium Extras →</a>
+      `;
+    }
   }
 });
 
