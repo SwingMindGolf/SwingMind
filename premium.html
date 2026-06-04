@@ -240,53 +240,56 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:1.1rem
     <div class="step-sub">Diese Infos machen deinen Coach deutlich präziser.</div>
 
     <div class="section-divider">Schlägerdistanzen — nur ausfüllen was du hast</div>
+    <div style="display:flex;flex-direction:column;gap:.5rem">
 
-    <div style="font-size:.75rem;color:var(--green);letter-spacing:.06em;text-transform:uppercase;margin-bottom:.5rem">Hölzer</div>
-    <div class="field-grid">
-      <div class="field"><label>Driver</label><input type="text" id="dist_driver" placeholder="~190m"></div>
-      <div class="field"><label>3-Holz</label><input type="text" id="dist_3w" placeholder="~175m"></div>
-    </div>
-    <div class="field-grid">
-      <div class="field"><label>5-Holz</label><input type="text" id="dist_5w" placeholder="~160m"></div>
-      <div class="field"><label>7-Holz</label><input type="text" id="dist_7w" placeholder="~150m"></div>
-    </div>
+      <div style="border:1px solid var(--gborder);border-radius:12px;overflow:hidden">
+        <button type="button" onclick="accToggle('driver')" style="width:100%;background:var(--bg2);border:none;padding:.85rem 1rem;display:flex;align-items:center;justify-content:space-between;cursor:pointer;font-size:.9rem;font-weight:500;color:var(--text);font-family:var(--sans)"><span>Driver</span><span id="ai-driver">▾</span></button>
+        <div id="ap-driver" style="display:none;padding:.75rem 1rem;background:var(--bg)"><label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.35rem;text-transform:uppercase;letter-spacing:.03em">Distanz</label><input type="text" id="dist_driver" placeholder="~190m" style="width:100%;background:var(--bg2);border:1px solid var(--gborder2);border-radius:10px;padding:.65rem 1rem;color:var(--text);font-family:var(--sans);font-size:.9rem;outline:none"></div>
+      </div>
 
-    <div style="font-size:.75rem;color:var(--green);letter-spacing:.06em;text-transform:uppercase;margin:.75rem 0 .5rem">Hybride</div>
-    <div class="field-grid">
-      <div class="field"><label>2-Hybrid</label><input type="text" id="dist_2h" placeholder="~185m"></div>
-      <div class="field"><label>3-Hybrid</label><input type="text" id="dist_3h" placeholder="~170m"></div>
-    </div>
-    <div class="field-grid">
-      <div class="field"><label>4-Hybrid</label><input type="text" id="dist_4h" placeholder="~158m"></div>
-      <div class="field"><label>5-Hybrid</label><input type="text" id="dist_5h" placeholder="~148m"></div>
-    </div>
+      <div style="border:1px solid var(--gborder);border-radius:12px;overflow:hidden">
+        <button type="button" onclick="accToggle('holzer')" style="width:100%;background:var(--bg2);border:none;padding:.85rem 1rem;display:flex;align-items:center;justify-content:space-between;cursor:pointer;font-size:.9rem;font-weight:500;color:var(--text);font-family:var(--sans)"><span>Hölzer</span><span id="ai-holzer">▾</span></button>
+        <div id="ap-holzer" style="display:none;padding:.75rem 1rem;background:var(--bg);display:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem">
+          <div><label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.03em">3-Holz</label><input type="text" id="dist_3w" placeholder="~175m" style="width:100%;background:var(--bg2);border:1px solid var(--gborder2);border-radius:10px;padding:.6rem .8rem;color:var(--text);font-family:var(--sans);font-size:.875rem;outline:none"></div>
+          <div><label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.03em">5-Holz</label><input type="text" id="dist_5w" placeholder="~160m" style="width:100%;background:var(--bg2);border:1px solid var(--gborder2);border-radius:10px;padding:.6rem .8rem;color:var(--text);font-family:var(--sans);font-size:.875rem;outline:none"></div>
+          <div><label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.03em">7-Holz</label><input type="text" id="dist_7w" placeholder="~150m" style="width:100%;background:var(--bg2);border:1px solid var(--gborder2);border-radius:10px;padding:.6rem .8rem;color:var(--text);font-family:var(--sans);font-size:.875rem;outline:none"></div>
+        </div></div>
+      </div>
 
-    <div style="font-size:.75rem;color:var(--green);letter-spacing:.06em;text-transform:uppercase;margin:.75rem 0 .5rem">Eisen</div>
-    <div class="field-grid">
-      <div class="field"><label>3-Eisen</label><input type="text" id="dist_3i" placeholder="~170m"></div>
-      <div class="field"><label>4-Eisen</label><input type="text" id="dist_4i" placeholder="~160m"></div>
-    </div>
-    <div class="field-grid">
-      <div class="field"><label>5-Eisen</label><input type="text" id="dist_5i" placeholder="~150m"></div>
-      <div class="field"><label>6-Eisen</label><input type="text" id="dist_6i" placeholder="~140m"></div>
-    </div>
-    <div class="field-grid">
-      <div class="field"><label>7-Eisen</label><input type="text" id="dist_7i" placeholder="~130m"></div>
-      <div class="field"><label>8-Eisen</label><input type="text" id="dist_8i" placeholder="~120m"></div>
-    </div>
-    <div class="field-grid">
-      <div class="field"><label>9-Eisen</label><input type="text" id="dist_9i" placeholder="~110m"></div>
-      <div class="field"><label>Pitching Wedge</label><input type="text" id="dist_pw" placeholder="~95m"></div>
-    </div>
+      <div style="border:1px solid var(--gborder);border-radius:12px;overflow:hidden">
+        <button type="button" onclick="accToggle('hybrid')" style="width:100%;background:var(--bg2);border:none;padding:.85rem 1rem;display:flex;align-items:center;justify-content:space-between;cursor:pointer;font-size:.9rem;font-weight:500;color:var(--text);font-family:var(--sans)"><span>Hybride</span><span id="ai-hybrid">▾</span></button>
+        <div id="ap-hybrid" style="display:none;padding:.75rem 1rem;background:var(--bg)"><div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem">
+          <div><label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.03em">2-Hybrid</label><input type="text" id="dist_2h" placeholder="~185m" style="width:100%;background:var(--bg2);border:1px solid var(--gborder2);border-radius:10px;padding:.6rem .8rem;color:var(--text);font-family:var(--sans);font-size:.875rem;outline:none"></div>
+          <div><label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.03em">3-Hybrid</label><input type="text" id="dist_3h" placeholder="~170m" style="width:100%;background:var(--bg2);border:1px solid var(--gborder2);border-radius:10px;padding:.6rem .8rem;color:var(--text);font-family:var(--sans);font-size:.875rem;outline:none"></div>
+          <div><label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.03em">4-Hybrid</label><input type="text" id="dist_4h" placeholder="~158m" style="width:100%;background:var(--bg2);border:1px solid var(--gborder2);border-radius:10px;padding:.6rem .8rem;color:var(--text);font-family:var(--sans);font-size:.875rem;outline:none"></div>
+          <div><label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.03em">5-Hybrid</label><input type="text" id="dist_5h" placeholder="~148m" style="width:100%;background:var(--bg2);border:1px solid var(--gborder2);border-radius:10px;padding:.6rem .8rem;color:var(--text);font-family:var(--sans);font-size:.875rem;outline:none"></div>
+        </div></div>
+      </div>
 
-    <div style="font-size:.75rem;color:var(--green);letter-spacing:.06em;text-transform:uppercase;margin:.75rem 0 .5rem">Wedges</div>
-    <div class="field-grid">
-      <div class="field"><label>Gap Wedge (AW)</label><input type="text" id="dist_gw" placeholder="~80m"></div>
-      <div class="field"><label>Sand Wedge (SW)</label><input type="text" id="dist_sw" placeholder="~65m"></div>
-    </div>
-    <div class="field-grid">
-      <div class="field"><label>Lob Wedge (LW)</label><input type="text" id="dist_lw" placeholder="~50m"></div>
-      <div class="field"><label>Extra Wedge</label><input type="text" id="dist_xw" placeholder="z.B. 60° ~40m"></div>
+      <div style="border:1px solid var(--gborder);border-radius:12px;overflow:hidden">
+        <button type="button" onclick="accToggle('eisen')" style="width:100%;background:var(--bg2);border:none;padding:.85rem 1rem;display:flex;align-items:center;justify-content:space-between;cursor:pointer;font-size:.9rem;font-weight:500;color:var(--text);font-family:var(--sans)"><span>Eisen</span><span id="ai-eisen">▾</span></button>
+        <div id="ap-eisen" style="display:none;padding:.75rem 1rem;background:var(--bg)"><div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem">
+          <div><label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.03em">3-Eisen</label><input type="text" id="dist_3i" placeholder="~170m" style="width:100%;background:var(--bg2);border:1px solid var(--gborder2);border-radius:10px;padding:.6rem .8rem;color:var(--text);font-family:var(--sans);font-size:.875rem;outline:none"></div>
+          <div><label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.03em">4-Eisen</label><input type="text" id="dist_4i" placeholder="~160m" style="width:100%;background:var(--bg2);border:1px solid var(--gborder2);border-radius:10px;padding:.6rem .8rem;color:var(--text);font-family:var(--sans);font-size:.875rem;outline:none"></div>
+          <div><label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.03em">5-Eisen</label><input type="text" id="dist_5i" placeholder="~150m" style="width:100%;background:var(--bg2);border:1px solid var(--gborder2);border-radius:10px;padding:.6rem .8rem;color:var(--text);font-family:var(--sans);font-size:.875rem;outline:none"></div>
+          <div><label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.03em">6-Eisen</label><input type="text" id="dist_6i" placeholder="~140m" style="width:100%;background:var(--bg2);border:1px solid var(--gborder2);border-radius:10px;padding:.6rem .8rem;color:var(--text);font-family:var(--sans);font-size:.875rem;outline:none"></div>
+          <div><label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.03em">7-Eisen</label><input type="text" id="dist_7i" placeholder="~130m" style="width:100%;background:var(--bg2);border:1px solid var(--gborder2);border-radius:10px;padding:.6rem .8rem;color:var(--text);font-family:var(--sans);font-size:.875rem;outline:none"></div>
+          <div><label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.03em">8-Eisen</label><input type="text" id="dist_8i" placeholder="~120m" style="width:100%;background:var(--bg2);border:1px solid var(--gborder2);border-radius:10px;padding:.6rem .8rem;color:var(--text);font-family:var(--sans);font-size:.875rem;outline:none"></div>
+          <div><label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.03em">9-Eisen</label><input type="text" id="dist_9i" placeholder="~110m" style="width:100%;background:var(--bg2);border:1px solid var(--gborder2);border-radius:10px;padding:.6rem .8rem;color:var(--text);font-family:var(--sans);font-size:.875rem;outline:none"></div>
+          <div><label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.03em">Pitching Wedge</label><input type="text" id="dist_pw" placeholder="~95m" style="width:100%;background:var(--bg2);border:1px solid var(--gborder2);border-radius:10px;padding:.6rem .8rem;color:var(--text);font-family:var(--sans);font-size:.875rem;outline:none"></div>
+        </div></div>
+      </div>
+
+      <div style="border:1px solid var(--gborder);border-radius:12px;overflow:hidden">
+        <button type="button" onclick="accToggle('wedges')" style="width:100%;background:var(--bg2);border:none;padding:.85rem 1rem;display:flex;align-items:center;justify-content:space-between;cursor:pointer;font-size:.9rem;font-weight:500;color:var(--text);font-family:var(--sans)"><span>Wedges</span><span id="ai-wedges">▾</span></button>
+        <div id="ap-wedges" style="display:none;padding:.75rem 1rem;background:var(--bg)"><div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem">
+          <div><label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.03em">Gap Wedge (AW)</label><input type="text" id="dist_gw" placeholder="~80m" style="width:100%;background:var(--bg2);border:1px solid var(--gborder2);border-radius:10px;padding:.6rem .8rem;color:var(--text);font-family:var(--sans);font-size:.875rem;outline:none"></div>
+          <div><label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.03em">Sand Wedge (SW)</label><input type="text" id="dist_sw" placeholder="~65m" style="width:100%;background:var(--bg2);border:1px solid var(--gborder2);border-radius:10px;padding:.6rem .8rem;color:var(--text);font-family:var(--sans);font-size:.875rem;outline:none"></div>
+          <div><label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.03em">Lob Wedge (LW)</label><input type="text" id="dist_lw" placeholder="~50m" style="width:100%;background:var(--bg2);border:1px solid var(--gborder2);border-radius:10px;padding:.6rem .8rem;color:var(--text);font-family:var(--sans);font-size:.875rem;outline:none"></div>
+          <div><label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.03em">Extra Wedge</label><input type="text" id="dist_xw" placeholder="z.B. 60° ~40m" style="width:100%;background:var(--bg2);border:1px solid var(--gborder2);border-radius:10px;padding:.6rem .8rem;color:var(--text);font-family:var(--sans);font-size:.875rem;outline:none"></div>
+        </div></div>
+      </div>
+
     </div>
 
     <div class="section-divider">Trainingsgewohnheiten</div>
@@ -407,7 +410,7 @@ function showMain() {
     const prof = JSON.parse(saved);
     const card = document.createElement('div');
     card.className = 'profile-card';
-    card.innerHTML = `<div><h3>${prof.name||'—'} · ${prof.side||'—'}</h3><p>Handicap: ${prof.handicap||'keins'} · ${prof.experience||'—'}</p></div><a href="generator.html" class="profile-edit">Profil ändern →</a>`;
+    card.innerHTML = `<div><h3>${prof.name||'—'} · ${prof.side||'—'}</h3><p>Handicap: ${prof.handicap||'keins'} · ${prof.experience||'—'}</p></div><a href="generator.html?from=premium" class="profile-edit">Profil ändern →</a>`;
     document.getElementById('mainScreen').insertBefore(card, document.getElementById('step6'));
     document.getElementById('step6Back').style.display='none';
     document.getElementById('step6').classList.add('active');
@@ -616,10 +619,11 @@ function restartPremium(){
 }
 
 function accToggle(id) {
-  const panel = document.getElementById('acc-'+id);
-  const icon = document.getElementById('acc-icon-'+id);
-  const isOpen = panel.style.display !== 'none' && panel.style.display !== '';
-  panel.style.display = isOpen ? 'none' : 'grid';
+  const panel = document.getElementById('ap-'+id);
+  const icon = document.getElementById('ai-'+id);
+  if (!panel) return;
+  const isOpen = panel.style.display === 'block' || panel.style.display === 'grid';
+  panel.style.display = isOpen ? 'none' : 'block';
   icon.style.transform = isOpen ? '' : 'rotate(180deg)';
 }
 
