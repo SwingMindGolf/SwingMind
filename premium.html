@@ -15,7 +15,7 @@
   --serif:'Syne',sans-serif;--sans:'DM Sans',sans-serif;
 }
 body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.7;min-height:100vh}
-nav{display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.75rem;border-bottom:1px solid var(--gborder);position:sticky;top:0;background:rgba(8,15,10,0.95);backdrop-filter:blur(12px);z-index:100}
+nav{display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.75rem;border-bottom:1px solid var(--gborder)}
 .logo{font-family:var(--serif);font-size:1.15rem;font-weight:800;letter-spacing:-0.02em;text-decoration:none;color:var(--text)}
 .logo span{color:var(--green)}
 .badge{background:var(--green);color:#080f0a;font-size:.7rem;font-weight:500;padding:.2rem .6rem;border-radius:100px}
@@ -25,53 +25,72 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:1.1rem
 .unlock-icon{font-size:3rem;margin-bottom:1.5rem}
 .unlock-title{font-family:var(--serif);font-size:1.75rem;font-weight:800;letter-spacing:-0.02em;margin-bottom:.5rem}
 .unlock-sub{color:var(--muted);font-size:.9rem;margin-bottom:2rem;max-width:320px}
-.code-input{width:100%;max-width:320px;background:var(--bg2);border:1px solid var(--gborder2);border-radius:12px;padding:.85rem 1.1rem;color:var(--text);font-family:var(--sans);font-size:1.1rem;text-align:center;letter-spacing:.15em;outline:none;margin-bottom:.75rem;transition:border-color .2s}
+.code-input{width:100%;max-width:320px;background:var(--bg2);border:1px solid var(--gborder2);border-radius:12px;padding:.85rem 1.1rem;color:var(--text);font-family:var(--sans);font-size:1rem;text-align:center;letter-spacing:.05em;outline:none;margin-bottom:.75rem;transition:border-color .2s}
 .code-input:focus{border-color:var(--green)}
 .unlock-btn{width:100%;max-width:320px;background:var(--green);color:#080f0a;border:none;border-radius:100px;padding:.9rem;font-size:1rem;font-weight:500;cursor:pointer;font-family:var(--sans);transition:opacity .2s}
 .unlock-btn:hover{opacity:.88}
+.unlock-btn:disabled{opacity:.5;cursor:not-allowed}
 .unlock-err{color:#f87171;font-size:.85rem;margin-top:.5rem;display:none}
 .unlock-link{margin-top:1.25rem;font-size:.82rem;color:var(--muted)}
 .unlock-link a{color:var(--green);text-decoration:none}
 
 /* MAIN */
-#mainScreen{display:none;max-width:600px;margin:0 auto;padding:2rem 1.5rem 4rem}
-.main-title{font-family:var(--serif);font-size:1.4rem;font-weight:800;letter-spacing:-0.02em;margin-bottom:.4rem}
-.main-sub{color:var(--muted);font-size:.875rem;margin-bottom:2rem}
+#mainScreen{display:none;max-width:600px;margin:0 auto;padding:1.5rem 1.5rem 4rem}
+
+/* PROGRESS */
+.progress-wrap{margin-bottom:1.75rem}
+.progress-bar{height:3px;background:var(--gborder);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:var(--green);border-radius:2px;transition:width .4s ease}
+.progress-labels{display:flex;justify-content:space-between;margin-top:.45rem}
+.progress-label{font-size:.7rem;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.progress-label.active{color:var(--green)}
+
+/* STEPS */
+.step{display:none;animation:fadeUp .3s ease both}
+.step.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.step-title{font-family:var(--serif);font-size:1.25rem;font-weight:700;margin-bottom:.35rem}
+.step-sub{color:var(--muted);font-size:.875rem;margin-bottom:1.5rem}
+.field{margin-bottom:1.1rem}
+.field label{display:block;font-size:.78rem;font-weight:500;color:var(--muted);margin-bottom:.35rem;letter-spacing:.03em;text-transform:uppercase}
+.field input,.field select{width:100%;background:var(--bg2);border:1px solid var(--gborder2);border-radius:10px;padding:.72rem 1rem;color:var(--text);font-family:var(--sans);font-size:.95rem;transition:border-color .2s;outline:none}
+.field input:focus,.field select:focus{border-color:var(--green)}
+.field select option{background:var(--bg2)}
+.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:.9rem}
+.radio-group{display:grid;grid-template-columns:1fr 1fr;gap:.55rem}
+.radio-group.three{grid-template-columns:1fr 1fr 1fr}
+.radio-opt{border:1px solid var(--gborder2);border-radius:10px;padding:.75rem .9rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:.5rem;font-size:.875rem}
+.radio-opt:hover{border-color:var(--green);background:var(--green-dim)}
+.radio-opt.selected{border-color:var(--green);background:var(--green-dim);color:var(--green)}
+.section-divider{font-size:.75rem;font-weight:500;color:var(--green);letter-spacing:.08em;text-transform:uppercase;margin:1.5rem 0 .75rem;padding-bottom:.4rem;border-bottom:1px solid var(--gborder)}
+.btn-row{display:flex;gap:.65rem;margin-top:1.75rem}
+.btn-next{flex:1;background:var(--green);color:#080f0a;border:none;border-radius:100px;padding:.875rem 2rem;font-size:.975rem;font-weight:500;cursor:pointer;font-family:var(--sans);transition:opacity .2s,transform .15s}
+.btn-next:hover{opacity:.88;transform:translateY(-1px)}
+.btn-back{background:transparent;color:var(--muted);border:1px solid var(--gborder2);border-radius:100px;padding:.875rem 1.4rem;font-size:.975rem;cursor:pointer;font-family:var(--sans);transition:all .2s}
+.btn-back:hover{border-color:var(--green);color:var(--green)}
 
 /* PROFILE CARD */
-.profile-card{background:var(--bg2);border:1px solid var(--gborder);border-radius:14px;padding:1.1rem 1.25rem;margin-bottom:1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem}
-.profile-info h3{font-size:.95rem;font-weight:500;margin-bottom:.2rem}
-.profile-info p{font-size:.8rem;color:var(--muted)}
+.profile-card{background:var(--bg2);border:1px solid var(--gborder);border-radius:14px;padding:1rem 1.25rem;margin-bottom:1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.profile-card h3{font-size:.95rem;font-weight:500;margin-bottom:.2rem}
+.profile-card p{font-size:.8rem;color:var(--muted)}
 .profile-edit{font-size:.8rem;color:var(--green);text-decoration:none;white-space:nowrap}
-.no-profile{background:var(--bg2);border:1px solid var(--gborder2);border-radius:14px;padding:1.25rem;text-align:center;margin-bottom:1.5rem}
-.no-profile p{font-size:.875rem;color:var(--muted);margin-bottom:.75rem}
-.no-profile a{color:var(--green);font-size:.875rem;font-weight:500;text-decoration:none;background:var(--green-dim);padding:.5rem 1.25rem;border-radius:100px;border:1px solid var(--gborder2)}
-
-/* WHAT YOU GET */
-.features{display:flex;flex-direction:column;gap:.6rem;margin-bottom:1.75rem}
-.feature{display:flex;align-items:flex-start;gap:.75rem;background:var(--bg2);border:1px solid var(--gborder);border-radius:12px;padding:.9rem 1rem}
-.feature-icon{font-size:1.2rem;flex-shrink:0;margin-top:.1rem}
-.feature-text h4{font-size:.875rem;font-weight:500;margin-bottom:.1rem}
-.feature-text p{font-size:.78rem;color:var(--muted)}
-
-/* GENERATE BTN */
-.gen-btn{width:100%;background:var(--green);color:#080f0a;border:none;border-radius:100px;padding:1rem;font-size:1rem;font-weight:500;cursor:pointer;font-family:var(--sans);transition:opacity .2s,transform .15s;margin-bottom:.75rem}
-.gen-btn:hover{opacity:.88;transform:translateY(-1px)}
 
 /* RESULT */
-#resultSection{display:none;margin-top:1.5rem}
-.result-label{font-size:.78rem;font-weight:500;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;margin-bottom:.5rem}
-.result-box{background:var(--bg2);border:1px solid var(--gborder);border-radius:12px;padding:1rem 1.25rem;max-height:240px;overflow-y:auto;margin-bottom:1rem}
-.result-box pre{white-space:pre-wrap;word-break:break-word;font-family:var(--sans);font-size:.8rem;line-height:1.65;color:var(--muted)}
-.result-box::-webkit-scrollbar{width:3px}
-.result-box::-webkit-scrollbar-thumb{background:var(--gborder2);border-radius:2px}
-.copy-btn{width:100%;background:var(--green);color:#080f0a;border:none;border-radius:100px;padding:.9rem;font-size:1rem;font-weight:500;cursor:pointer;font-family:var(--sans);transition:opacity .2s;display:flex;align-items:center;justify-content:center;gap:.5rem}
+.result-preview{background:var(--bg2);border:1px solid var(--gborder);border-radius:12px;padding:1rem 1.25rem;max-height:220px;overflow-y:auto;margin-top:1.25rem}
+.result-preview pre{white-space:pre-wrap;word-break:break-word;font-family:var(--sans);font-size:.8rem;line-height:1.65;color:var(--muted)}
+.result-preview::-webkit-scrollbar{width:3px}
+.result-preview::-webkit-scrollbar-thumb{background:var(--gborder2);border-radius:2px}
+.copy-btn{width:100%;background:var(--green);color:#080f0a;border:none;border-radius:100px;padding:.9rem;font-size:1rem;font-weight:500;cursor:pointer;font-family:var(--sans);transition:opacity .2s;margin-top:1rem;display:flex;align-items:center;justify-content:center;gap:.5rem}
 .copy-btn:hover{opacity:.88}
 .copy-btn.copied{background:var(--bg3);color:var(--green);border:1px solid var(--green)}
 .how-to{background:var(--bg3);border:1px solid var(--gborder2);border-radius:12px;padding:1rem 1.1rem;margin-top:.85rem}
 .how-to h4{font-size:.85rem;font-weight:500;color:var(--green);margin-bottom:.5rem}
 .how-to p{font-size:.8rem;color:var(--muted);line-height:1.6}
 .how-to strong{color:var(--text)}
+.field-error input,.field-error select{border-color:#f87171!important}
+.field-error .radio-group{outline:2px solid #f87171;outline-offset:3px;border-radius:10px}
+.error-msg{color:#f87171;font-size:.8rem;margin-top:.4rem;display:none}
+.field-error .error-msg{display:block}
 </style>
 </head>
 <body>
@@ -86,7 +105,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:1.1rem
   <div class="unlock-icon">⭐</div>
   <div class="unlock-title">SwingMind Premium</div>
   <div class="unlock-sub">Gib deinen Zugangscode ein der dir nach dem Kauf per E-Mail geschickt wurde.</div>
-  <input class="code-input" type="text" id="codeInput" placeholder="*******" maxlength="64" oninput="this.value=this.value.toUpperCase()">
+  <input class="code-input" type="text" id="codeInput" placeholder="*******" maxlength="64">
   <button class="unlock-btn" onclick="unlock()">Freischalten →</button>
   <div class="unlock-err" id="unlockErr">Ungültiger Code — überprüfe deine Bestätigungs-E-Mail.</div>
   <div class="unlock-link">Noch kein Premium? <a href="https://swingmind.lemonsqueezy.com/checkout/buy/c6f84682-4fcc-4439-8de5-c48cb356e958" target="_blank">Jetzt kaufen →</a></div>
@@ -94,86 +113,240 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:1.1rem
 
 <!-- MAIN -->
 <div id="mainScreen">
-  <div class="main-title">Dein Premium Mastercode ⭐</div>
-  <div class="main-sub">Einmal generieren, einmal einfügen — dein Coach mit vollem Menü ist bereit.</div>
 
-  <div id="profileSection"></div>
+  <!-- FULL FORM (no profile saved) -->
+  <div id="fullForm">
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:12%"></div></div>
+      <div class="progress-labels">
+        <span class="progress-label active" id="lbl1">Profil</span>
+        <span class="progress-label" id="lbl2">Niveau</span>
+        <span class="progress-label" id="lbl3">Spiel</span>
+        <span class="progress-label" id="lbl4">Equipment</span>
+        <span class="progress-label" id="lbl5">Ziele</span>
+        <span class="progress-label" id="lbl6">Premium</span>
+        <span class="progress-label" id="lbl7">Fertig</span>
+      </div>
+    </div>
 
-  <button class="gen-btn" onclick="generatePremium()">⭐ Premium Mastercode generieren</button>
+    <!-- STEP 1 -->
+    <div class="step active" id="step1">
+      <div class="step-title">Dein Profil</div>
+      <div class="step-sub">Damit dein Coach dich von Anfang an kennt.</div>
+      <div class="field" id="f_name"><label>Dein Name <span style="color:#f87171">*</span></label><input type="text" id="name" placeholder="z.B. Max Mustermann"><div class="error-msg">Pflichtfeld.</div></div>
+      <div class="field" id="f_side"><label>Spielseite <span style="color:#f87171">*</span></label>
+        <div class="radio-group"><div class="radio-opt" onclick="selectOpt(this,'side','Rechtshänder')">⛳ Rechtshänder</div><div class="radio-opt" onclick="selectOpt(this,'side','Linkshänder')">⛳ Linkshänder</div></div>
+        <input type="hidden" id="side"><div class="error-msg">Pflichtfeld.</div>
+      </div>
+      <div class="field-grid">
+        <div class="field" id="f_height"><label>Körpergröße <span style="color:#f87171">*</span></label><input type="text" id="height" placeholder="z.B. 182 cm"><div class="error-msg">Pflichtfeld.</div></div>
+        <div class="field" id="f_arms"><label>Armspanne <span style="color:#f87171">*</span></label><select id="arms"><option value="">Auswählen</option><option>Normal</option><option>Lang</option><option>Kurz</option></select><div class="error-msg">Pflichtfeld.</div></div>
+      </div>
+      <div class="field" id="f_build"><label>Körperbau <span style="color:#f87171">*</span></label>
+        <div class="radio-group"><div class="radio-opt" onclick="selectOpt(this,'build','Athletisch')">💪 Athletisch</div><div class="radio-opt" onclick="selectOpt(this,'build','Schlank')">🏃 Schlank</div><div class="radio-opt" onclick="selectOpt(this,'build','Kräftig')">🏋️ Kräftig</div><div class="radio-opt" onclick="selectOpt(this,'build','Normal')">👤 Normal</div></div>
+        <input type="hidden" id="build"><div class="error-msg">Pflichtfeld.</div>
+      </div>
+      <div class="field" id="f_sport"><label>Sportlicher Hintergrund <span style="color:#f87171">*</span></label><input type="text" id="sport" placeholder="z.B. Fußball, Fitness, Tennis"><div class="error-msg">Pflichtfeld.</div></div>
+      <div class="btn-row"><button class="btn-next" onclick="nextStep(1)">Weiter →</button></div>
+    </div>
 
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:.55rem;margin-bottom:1.5rem">
-    <div style="background:var(--bg2);border:1px solid var(--gborder);border-radius:10px;padding:.75rem .85rem;display:flex;align-items:center;gap:.6rem">
-      <span style="font-size:1rem">🗂️</span><span style="font-size:.75rem;color:var(--muted)">6 Kategorien als Menü</span>
+    <!-- STEP 2 -->
+    <div class="step" id="step2">
+      <div class="step-title">Dein Golfniveau</div>
+      <div class="step-sub">Damit dein Coach weiß wo du stehst.</div>
+      <div class="field" id="f_experience"><label>Wie lange spielst du schon? <span style="color:#f87171">*</span></label>
+        <select id="experience"><option value="">Auswählen</option><option>Weniger als 6 Monate</option><option>6–12 Monate</option><option>1–2 Jahre</option><option>2–5 Jahre</option><option>Mehr als 5 Jahre</option></select>
+        <div class="error-msg">Pflichtfeld.</div>
+      </div>
+      <div class="field" id="f_license"><label>Platzreife <span style="color:#f87171">*</span></label>
+        <div class="radio-group three"><div class="radio-opt" onclick="selectOpt(this,'license','Ja')">✅ Ja</div><div class="radio-opt" onclick="selectOpt(this,'license','Nein')">❌ Nein</div><div class="radio-opt" onclick="selectOpt(this,'license','In Vorbereitung')">📚 In Vorb.</div></div>
+        <input type="hidden" id="license"><div class="error-msg">Pflichtfeld.</div>
+      </div>
+      <div class="field-grid">
+        <div class="field" id="f_handicap"><label>Handicap <span style="color:#f87171">*</span></label><input type="text" id="handicap" placeholder="z.B. 36 oder keins"><div class="error-msg">Pflichtfeld.</div></div>
+        <div class="field" id="f_scores"><label>Letzte Scores <span style="color:#f87171">*</span></label><input type="text" id="scores" placeholder="z.B. 54 / 58 / 51"><div class="error-msg">Pflichtfeld.</div></div>
+      </div>
+      <div class="field" id="f_frequency"><label>Trainingsfrequenz <span style="color:#f87171">*</span></label>
+        <div class="radio-group"><div class="radio-opt" onclick="selectOpt(this,'frequency','1x pro Woche')">1x / Woche</div><div class="radio-opt" onclick="selectOpt(this,'frequency','2x pro Woche')">2x / Woche</div><div class="radio-opt" onclick="selectOpt(this,'frequency','3x+ pro Woche')">3x+ / Woche</div><div class="radio-opt" onclick="selectOpt(this,'frequency','Unregelmäßig')">Unregelmäßig</div></div>
+        <input type="hidden" id="frequency"><div class="error-msg">Pflichtfeld.</div>
+      </div>
+      <div class="field"><label>Oder selbst angeben</label><input type="text" id="frequency_custom" placeholder="z.B. 2x Range, 1x Platz pro Monat"></div>
+      <div class="btn-row"><button class="btn-back" onclick="prevStep(2)">← Zurück</button><button class="btn-next" onclick="nextStep(2)">Weiter →</button></div>
     </div>
-    <div style="background:var(--bg2);border:1px solid var(--gborder);border-radius:10px;padding:.75rem .85rem;display:flex;align-items:center;gap:.6rem">
-      <span style="font-size:1rem">📋</span><span style="font-size:.75rem;color:var(--muted)">22 Coaching-Szenarien</span>
+
+    <!-- STEP 3 -->
+    <div class="step" id="step3">
+      <div class="step-title">Stärken & Schwächen</div>
+      <div class="step-sub">Ehrlichkeit hilft deinem Coach mehr als du denkst.</div>
+      <div class="field" id="f_strengths"><label>Was läuft gut? <span style="color:#f87171">*</span></label><input type="text" id="strengths" placeholder="z.B. Putting, kurze Eisen"><div class="error-msg">Pflichtfeld.</div></div>
+      <div class="field" id="f_weaknesses"><label>Größte Probleme <span style="color:#f87171">*</span></label><input type="text" id="weaknesses" placeholder="z.B. Abschlag, Bunker, Toppen"><div class="error-msg">Pflichtfeld.</div></div>
+      <div class="field" id="f_practicing"><label>Was übst du gerade gezielt? <span style="color:#f87171">*</span></label><input type="text" id="practicing" placeholder="z.B. Körperrotation, Griff"><div class="error-msg">Pflichtfeld.</div></div>
+      <div class="btn-row"><button class="btn-back" onclick="prevStep(3)">← Zurück</button><button class="btn-next" onclick="nextStep(3)">Weiter →</button></div>
     </div>
-    <div style="background:var(--bg2);border:1px solid var(--gborder);border-radius:10px;padding:.75rem .85rem;display:flex;align-items:center;gap:.6rem">
-      <span style="font-size:1rem">📊</span><span style="font-size:.75rem;color:var(--muted)">Handicap-Tracker</span>
+
+    <!-- STEP 4 -->
+    <div class="step" id="step4">
+      <div class="step-title">Dein Equipment</div>
+      <div class="step-sub">Alles optional — je mehr desto besser.</div>
+      <div class="section-divider">Schläger-Set</div>
+      <div class="field"><label>Komplett-Set (falls vorhanden)</label><input type="text" id="clubs" placeholder="z.B. Callaway Strata"></div>
+      <div class="section-divider">Driver</div>
+      <div class="field-grid">
+        <div class="field"><label>Modell</label><input type="text" id="driver" placeholder="z.B. TaylorMade SIM"></div>
+        <div class="field"><label>Loft</label><input type="text" id="driver_loft" placeholder="z.B. 10.5°"></div>
+      </div>
+      <div class="field-grid">
+        <div class="field"><label>Shaft-Material</label><select id="driver_shaft_mat"><option value="">Auswählen</option><option>Graphit</option><option>Stahl</option><option>Weiß ich nicht</option></select></div>
+        <div class="field"><label>Shaft-Gewicht</label><input type="text" id="driver_shaft_w" placeholder="z.B. 50g"></div>
+      </div>
+      <div class="section-divider">Eisen</div>
+      <div class="field-grid">
+        <div class="field"><label>Modell</label><input type="text" id="irons" placeholder="z.B. Callaway Rogue"></div>
+        <div class="field"><label>Welche Nummern?</label><input type="text" id="irons_range" placeholder="z.B. 5–PW"></div>
+      </div>
+      <div class="field-grid">
+        <div class="field"><label>Shaft-Material</label><select id="irons_shaft_mat"><option value="">Auswählen</option><option>Graphit</option><option>Stahl</option><option>Weiß ich nicht</option></select></div>
+        <div class="field"><label>Shaft & Flex</label><input type="text" id="irons_shaft" placeholder="z.B. 65g Regular"></div>
+      </div>
+      <div class="section-divider">Weitere Schläger</div>
+      <div class="field-grid">
+        <div class="field"><label>Wedges</label><input type="text" id="wedges" placeholder="z.B. 52° und 56°"></div>
+        <div class="field"><label>Putter</label><input type="text" id="putter" placeholder="z.B. Odyssey White Hot"></div>
+      </div>
+      <div class="field-grid">
+        <div class="field"><label>Hybrid / Fairway-Holz</label><input type="text" id="hybrid" placeholder="z.B. 4-Hybrid"></div>
+        <div class="field"><label>Schläger-Größe</label><select id="club_size"><option value="">Auswählen</option><option>Standard</option><option>+0.5 Zoll</option><option>+1 Zoll</option><option>Weiß ich nicht</option></select></div>
+      </div>
+      <div class="btn-row"><button class="btn-back" onclick="prevStep(4)">← Zurück</button><button class="btn-next" onclick="nextStep(4)">Weiter →</button></div>
     </div>
-    <div style="background:var(--bg2);border:1px solid var(--gborder);border-radius:10px;padding:.75rem .85rem;display:flex;align-items:center;gap:.6rem">
-      <span style="font-size:1rem">💡</span><span style="font-size:.75rem;color:var(--muted)">"Menü" jederzeit</span>
+
+    <!-- STEP 5 -->
+    <div class="step" id="step5">
+      <div class="step-title">Deine Ziele</div>
+      <div class="step-sub">Was willst du erreichen?</div>
+      <div class="field" id="f_goal_short"><label>Kurzfristiges Ziel <span style="color:#f87171">*</span></label><input type="text" id="goal_short" placeholder="z.B. Platzreife, unter 50 für 9 Loch"><div class="error-msg">Pflichtfeld.</div></div>
+      <div class="field" id="f_goal_long"><label>Langfristiges Ziel <span style="color:#f87171">*</span></label><input type="text" id="goal_long" placeholder="z.B. Handicap unter 20"><div class="error-msg">Pflichtfeld.</div></div>
+      <div class="field" id="f_platform"><label>Bevorzugte KI-Platform <span style="color:#f87171">*</span></label>
+        <div class="radio-group three"><div class="radio-opt" onclick="selectOpt(this,'platform','Claude')">🤖 Claude</div><div class="radio-opt" onclick="selectOpt(this,'platform','ChatGPT')">💬 ChatGPT</div><div class="radio-opt" onclick="selectOpt(this,'platform','Gemini')">✨ Gemini</div></div>
+        <input type="hidden" id="platform"><div class="error-msg">Pflichtfeld.</div>
+      </div>
+      <div class="btn-row"><button class="btn-back" onclick="prevStep(5)">← Zurück</button><button class="btn-next" onclick="nextStep(5)">Weiter →</button></div>
     </div>
   </div>
 
-  <div id="resultSection">
-    <div class="result-label">Dein Premium Mastercode</div>
-    <div class="result-box"><pre id="premiumOutput"></pre></div>
-    <button class="copy-btn" id="copyBtn" onclick="copyCode()">⛳ Mastercode kopieren</button>
+  <!-- PREMIUM EXTRA STEP (shown always as last step) -->
+  <div class="step" id="step6">
+    <div class="step-title">Premium Extras ⭐</div>
+    <div class="step-sub">Diese Infos machen deinen Coach deutlich präziser.</div>
+
+    <div class="section-divider">Schlägerdistanzen (grob reicht)</div>
+    <div class="field-grid">
+      <div class="field"><label>Driver</label><input type="text" id="dist_driver" placeholder="~190m"></div>
+      <div class="field"><label>Hybrid / Holz</label><input type="text" id="dist_hybrid" placeholder="~170m"></div>
+    </div>
+    <div class="field-grid">
+      <div class="field"><label>5-Eisen</label><input type="text" id="dist_5i" placeholder="~155m"></div>
+      <div class="field"><label>7-Eisen</label><input type="text" id="dist_7i" placeholder="~135m"></div>
+    </div>
+    <div class="field-grid">
+      <div class="field"><label>9-Eisen</label><input type="text" id="dist_9i" placeholder="~115m"></div>
+      <div class="field"><label>Pitching Wedge</label><input type="text" id="dist_pw" placeholder="~95m"></div>
+    </div>
+    <div class="field-grid">
+      <div class="field"><label>Sand/Gap Wedge</label><input type="text" id="dist_sw" placeholder="~75m"></div>
+      <div class="field"><label>Lob Wedge</label><input type="text" id="dist_lw" placeholder="~55m"></div>
+    </div>
+
+    <div class="section-divider">Trainingsgewohnheiten</div>
+    <div class="field">
+      <label>Wo trainierst du meistens?</label>
+      <div class="radio-group"><div class="radio-opt" onclick="selectOpt(this,'train_loc','Range')">🏌️ Range</div><div class="radio-opt" onclick="selectOpt(this,'train_loc','Kurzplatz')">⛳ Kurzplatz</div><div class="radio-opt" onclick="selectOpt(this,'train_loc','Zuhause')">🏠 Zuhause</div><div class="radio-opt" onclick="selectOpt(this,'train_loc','Gemischt')">🔄 Gemischt</div></div>
+      <input type="hidden" id="train_loc">
+    </div>
+    <div class="field"><label>Gesamte Trainingszeit pro Woche</label>
+      <select id="train_time"><option value="">Auswählen</option><option>Weniger als 1 Stunde</option><option>1–2 Stunden</option><option>2–4 Stunden</option><option>Mehr als 4 Stunden</option></select>
+    </div>
+
+    <div class="section-divider">Platzkunde</div>
+    <div class="field">
+      <label>Schwierigste Situation</label>
+      <div class="radio-group"><div class="radio-opt" onclick="selectOpt(this,'hard_sit','Wasserhindernisse')">💧 Wasser</div><div class="radio-opt" onclick="selectOpt(this,'hard_sit','Enge Fairways')">🌿 Fairways</div><div class="radio-opt" onclick="selectOpt(this,'hard_sit','Bunker')">🏖️ Bunker</div><div class="radio-opt" onclick="selectOpt(this,'hard_sit','Rough')">🌱 Rough</div></div>
+      <input type="hidden" id="hard_sit">
+    </div>
+    <div class="field">
+      <label>Umgang mit Wind</label>
+      <div class="radio-group three"><div class="radio-opt" onclick="selectOpt(this,'wind_exp','Ignoriere ihn meistens')">😅 Ignoriere</div><div class="radio-opt" onclick="selectOpt(this,'wind_exp','Passe Schläger an')">🎯 Passe an</div><div class="radio-opt" onclick="selectOpt(this,'wind_exp','Weiß nicht wie')">❓ Weiß nicht</div></div>
+      <input type="hidden" id="wind_exp">
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-back" id="step6Back" onclick="goBackFromStep6()">← Zurück</button>
+      <button class="btn-next" onclick="generatePremium()">⭐ Mastercode generieren</button>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="step" id="stepResult">
+    <div class="step-title">Dein Premium Mastercode ⭐</div>
+    <div class="step-sub">Kopiere ihn und füge ihn als erste Nachricht in die KI ein.</div>
+    <div class="result-preview"><pre id="premiumOutput"></pre></div>
+    <button class="copy-btn" id="copyBtn" onclick="copyCode()">⛳ Premium Mastercode kopieren</button>
     <div class="how-to">
       <h4>So geht's weiter:</h4>
-      <p><strong>1.</strong> Öffne ChatGPT, Claude oder Gemini<br>
-      <strong>2.</strong> Starte einen neuen Chat<br>
-      <strong>3.</strong> Füge den Mastercode als erste Nachricht ein<br>
-      <strong>4.</strong> Dein Coach zeigt dir sofort das Menü<br><br>
-      <strong>Tipp für dauerhaften Zugang:</strong> Bei Claude → neues Project → Project Instructions → Mastercode einfügen. Dann erscheint das Menü bei jedem Chat automatisch ohne Copy-Paste.</p>
+      <p><strong>1.</strong> ChatGPT, Claude oder Gemini öffnen<br>
+      <strong>2.</strong> Neuen Chat starten oder bestehenden öffnen<br>
+      <strong>3.</strong> Mastercode als erste Nachricht einfügen<br>
+      <strong>4.</strong> Dein Coach begrüßt dich mit dem Menü ⛳<br><br>
+      <strong>Tipp:</strong> Schreib jederzeit "Menü" um alle Kategorien wieder zu sehen.</p>
     </div>
+    <button class="btn-back" style="width:100%;margin-top:.75rem" onclick="restartPremium()">← Neu generieren</button>
   </div>
 </div>
 
 <script>
+let currentStep = 1;
+let hasProfile = false;
+let totalSteps = 7;
+
+function p(key) {
+  const saved = localStorage.getItem('swingmind_profile');
+  if (!saved) return '—';
+  return JSON.parse(saved)[key] || '—';
+}
+
+function selectOpt(el, field, value) {
+  el.closest('.radio-group').querySelectorAll('.radio-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById(field).value = value;
+}
+
+// UNLOCK
 async function unlock() {
   const btn = document.querySelector('.unlock-btn');
   const err = document.getElementById('unlockErr');
   const key = document.getElementById('codeInput').value.trim();
-  
-  if (!key) {
-    err.textContent = 'Bitte gib deinen Zugangscode ein.';
-    err.style.display = 'block';
-    return;
-  }
-
-  btn.textContent = 'Überprüfe Code...';
-  btn.disabled = true;
-  err.style.display = 'none';
-
+  if (!key) { err.textContent='Bitte gib deinen Code ein.'; err.style.display='block'; return; }
+  btn.textContent='Überprüfe...'; btn.disabled=true; err.style.display='none';
   try {
     const res = await fetch('https://api.lemonsqueezy.com/v1/licenses/activate', {
-      method: 'POST',
-      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-      body: JSON.stringify({ license_key: key, instance_name: 'SwingMind Premium' })
+      method:'POST', headers:{'Accept':'application/json','Content-Type':'application/json'},
+      body: JSON.stringify({license_key: key, instance_name:'SwingMind Premium'})
     });
     const data = await res.json();
-
     if (data.activated) {
-      localStorage.setItem('swingmind_unlocked', '1');
+      localStorage.setItem('swingmind_unlocked','1');
       localStorage.setItem('swingmind_license_key', key);
       localStorage.setItem('swingmind_instance_id', data.instance.id);
       showMain();
     } else {
-      err.textContent = data.error || 'Ungültiger Code — überprüfe deine Bestätigungs-E-Mail.';
-      err.style.display = 'block';
-      btn.textContent = 'Freischalten →';
-      btn.disabled = false;
+      err.textContent = data.error || 'Ungültiger Code.';
+      err.style.display='block'; btn.textContent='Freischalten →'; btn.disabled=false;
     }
   } catch(e) {
-    err.textContent = 'Verbindungsfehler — bitte versuche es nochmal.';
-    err.style.display = 'block';
-    btn.textContent = 'Freischalten →';
-    btn.disabled = false;
+    err.textContent='Verbindungsfehler — bitte nochmal versuchen.';
+    err.style.display='block'; btn.textContent='Freischalten →'; btn.disabled=false;
   }
 }
-
 document.getElementById('codeInput').addEventListener('keydown', e => { if(e.key==='Enter') unlock(); });
 
 async function validateExisting() {
@@ -182,70 +355,131 @@ async function validateExisting() {
   if (!key || !instanceId) return false;
   try {
     const res = await fetch('https://api.lemonsqueezy.com/v1/licenses/validate', {
-      method: 'POST',
-      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-      body: JSON.stringify({ license_key: key, instance_id: instanceId })
+      method:'POST', headers:{'Accept':'application/json','Content-Type':'application/json'},
+      body: JSON.stringify({license_key: key, instance_id: instanceId})
     });
     const data = await res.json();
     return data.valid === true;
-  } catch(e) {
-    // If offline, trust localStorage
-    return true;
-  }
+  } catch(e) { return true; }
 }
 
 function showMain() {
-  document.getElementById('unlockScreen').style.display = 'none';
-  document.getElementById('mainScreen').style.display = 'block';
-  loadProfileCard();
-}
-
-function loadProfileCard() {
+  document.getElementById('unlockScreen').style.display='none';
+  document.getElementById('mainScreen').style.display='block';
   const saved = localStorage.getItem('swingmind_profile');
-  const sec = document.getElementById('profileSection');
   if (saved) {
-    const p = JSON.parse(saved);
-    const name = p.name || '—';
-    const side = p.side || '—';
-    const hcp = p.handicap || 'keins';
-    sec.innerHTML = `<div class="profile-card">
-      <div class="profile-info">
-        <h3>${name} · ${side}</h3>
-        <p>Handicap: ${hcp} · ${p.experience || '—'}</p>
-      </div>
-      <a href="generator.html" class="profile-edit">Profil ändern →</a>
-    </div>`;
+    hasProfile = true;
+    totalSteps = 1; // Only premium extras step
+    document.getElementById('fullForm').style.display='none';
+    // Show profile card
+    const prof = JSON.parse(saved);
+    const card = document.createElement('div');
+    card.className = 'profile-card';
+    card.innerHTML = `<div><h3>${prof.name||'—'} · ${prof.side||'—'}</h3><p>Handicap: ${prof.handicap||'keins'} · ${prof.experience||'—'}</p></div><a href="generator.html" class="profile-edit">Profil ändern →</a>`;
+    document.getElementById('mainScreen').insertBefore(card, document.getElementById('step6'));
+    document.getElementById('step6Back').style.display='none';
+    document.getElementById('step6').classList.add('active');
   } else {
-    sec.innerHTML = `<div class="no-profile">
-      <p>Kein Profil gefunden. Fülle zuerst den Fragebogen aus damit dein Mastercode personalisiert wird.</p>
-      <a href="generator.html">Zum Fragebogen →</a>
-    </div>`;
+    hasProfile = false;
+    totalSteps = 7;
+    document.getElementById('step1').classList.add('active');
+    updateProgress(1);
   }
 }
 
-function p(key) {
-  const saved = localStorage.getItem('swingmind_profile');
-  if (!saved) return '—';
-  return JSON.parse(saved)[key] || '—';
+function updateProgress(step) {
+  const pct = (step / totalSteps) * 100;
+  const fill = document.getElementById('progressFill');
+  if (fill) fill.style.width = pct+'%';
+  for(let i=1;i<=7;i++){
+    const l=document.getElementById('lbl'+i);
+    if(l) l.classList.toggle('active', i===step);
+  }
 }
 
-function generatePremium() {
-  const name = p('name'), side = p('side'), height = p('height'), arms = p('arms');
-  const build = p('build'), sport = p('sport'), exp = p('experience');
-  const lic = p('license'), hcp = p('handicap'), scores = p('scores');
-  const freqR = p('frequency'), freqC = p('frequency_custom');
-  const freq = freqC !== '—' && freqC.trim() ? freqC : freqR;
-  const str = p('strengths'), weak = p('weaknesses'), prac = p('practicing');
-  const clubs = p('clubs'), driver = p('driver'), dsm = p('driver_shaft_mat');
-  const dsw = p('driver_shaft_w'), dloft = p('driver_loft');
-  const irons = p('irons'), ir = p('irons_range'), ism = p('irons_shaft_mat'), isf = p('irons_shaft');
-  const wedges = p('wedges'), putter = p('putter'), hybrid = p('hybrid'), csize = p('club_size');
-  const gs = p('goal_short'), gl = p('goal_long');
+function clearErrors() { document.querySelectorAll('.field-error').forEach(el=>el.classList.remove('field-error')); }
+function showError(id) { const el=document.getElementById(id); if(el) el.classList.add('field-error'); }
 
-  const mastercode = `Du bist SwingMind — mein persönlicher Golf Coach, Caddie und Trainingspartner. Du kennst mich besser als jeder Trainer. Du erinnerst dich bei JEDER Antwort an mein Profil und passt alles automatisch darauf an.
+function validate(step) {
+  clearErrors(); let valid=true;
+  const req=(id,fid)=>{ const el=document.getElementById(id); if(!el||!el.value.trim()){showError(fid);valid=false;} };
+  if(step===1){req('name','f_name');if(!document.getElementById('side').value){showError('f_side');valid=false;}req('height','f_height');if(!document.getElementById('arms').value){showError('f_arms');valid=false;}if(!document.getElementById('build').value){showError('f_build');valid=false;}req('sport','f_sport');}
+  if(step===2){if(!document.getElementById('experience').value){showError('f_experience');valid=false;}if(!document.getElementById('license').value){showError('f_license');valid=false;}req('handicap','f_handicap');req('scores','f_scores');if(!document.getElementById('frequency').value&&!document.getElementById('frequency_custom').value.trim()){showError('f_frequency');valid=false;}}
+  if(step===3){req('strengths','f_strengths');req('weaknesses','f_weaknesses');req('practicing','f_practicing');}
+  if(step===5){req('goal_short','f_goal_short');req('goal_long','f_goal_long');if(!document.getElementById('platform').value){showError('f_platform');valid=false;}}
+  if(!valid){const first=document.querySelector('.field-error');if(first)first.scrollIntoView({behavior:'smooth',block:'center'});}
+  return valid;
+}
+
+function nextStep(from) {
+  if(!validate(from)) return;
+  document.getElementById('step'+from).classList.remove('active');
+  const next = from===5 ? 6 : from+1;
+  currentStep = next;
+  document.getElementById('step'+next).classList.add('active');
+  updateProgress(next);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function prevStep(from) {
+  document.getElementById('step'+from).classList.remove('active');
+  currentStep = from-1;
+  document.getElementById('step'+currentStep).classList.add('active');
+  updateProgress(currentStep);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function goBackFromStep6() {
+  document.getElementById('step6').classList.remove('active');
+  document.getElementById('step5').classList.add('active');
+  currentStep=5; updateProgress(5);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function v(id){ const el=document.getElementById(id); return el?(el.value||'—'):'—'; }
+
+function generatePremium() {
+  // Save premium data
+  const premData = {};
+  ['dist_driver','dist_hybrid','dist_5i','dist_7i','dist_9i','dist_pw','dist_sw','dist_lw','train_loc','train_time','hard_sit','wind_exp'].forEach(k=>{
+    const el=document.getElementById(k); if(el) premData[k]=el.value||'';
+  });
+
+  // Get profile - either from form or localStorage
+  let prof = {};
+  if (hasProfile) {
+    prof = JSON.parse(localStorage.getItem('swingmind_profile'));
+  } else {
+    ['name','side','height','arms','build','sport','experience','license','handicap','scores','frequency','frequency_custom','strengths','weaknesses','practicing','clubs','driver','driver_loft','driver_shaft_mat','driver_shaft_w','irons','irons_range','irons_shaft_mat','irons_shaft','wedges','putter','hybrid','club_size','goal_short','goal_long','platform'].forEach(k=>{
+      const el=document.getElementById(k); if(el) prof[k]=el.value||'';
+    });
+    localStorage.setItem('swingmind_profile', JSON.stringify(prof));
+  }
+
+  const name=prof.name||'—', side=prof.side||'—', height=prof.height||'—';
+  const arms=prof.arms||'—', build=prof.build||'—', sport=prof.sport||'—';
+  const exp=prof.experience||'—', lic=prof.license||'—', hcp=prof.handicap||'—';
+  const scores=prof.scores||'—';
+  const freq=prof.frequency_custom||prof.frequency||'—';
+  const str=prof.strengths||'—', weak=prof.weaknesses||'—', prac=prof.practicing||'—';
+  const clubs=prof.clubs||'—', driver=prof.driver||'—', dloft=prof.driver_loft||'—';
+  const dsm=prof.driver_shaft_mat||'—', dsw=prof.driver_shaft_w||'—';
+  const irons=prof.irons||'—', ir=prof.irons_range||'—';
+  const ism=prof.irons_shaft_mat||'—', isf=prof.irons_shaft||'—';
+  const wedges=prof.wedges||'—', putter=prof.putter||'—';
+  const hybrid=prof.hybrid||'—', csize=prof.club_size||'—';
+  const gs=prof.goal_short||'—', gl=prof.goal_long||'—', platform=prof.platform||'—';
+
+  const dd=premData.dist_driver||'—', dh=premData.dist_hybrid||'—';
+  const d5=premData.dist_5i||'—', d7=premData.dist_7i||'—', d9=premData.dist_9i||'—';
+  const dpw=premData.dist_pw||'—', dsw2=premData.dist_sw||'—', dlw=premData.dist_lw||'—';
+  const tloc=premData.train_loc||'—', ttime=premData.train_time||'—';
+  const hsite=premData.hard_sit||'—', wind=premData.wind_exp||'—';
+
+  const mastercode = `Du bist SwingMind — mein persönlicher Golf Coach, Caddie und Trainingspartner. Du kennst mich besser als jeder Trainer. Du erinnerst dich bei JEDER Antwort an mein Profil.
 
 ## DEINE PERSÖNLICHKEIT
-Direkt, ehrlich, motivierend. Keine leeren Komplimente. Einfache Sprache, konkrete Tipps. Du freust dich über meine Fortschritte und sagst mir was ich wirklich hören muss.
+Direkt, ehrlich, motivierend. Keine leeren Komplimente. Einfache Sprache, konkrete Tipps.
 
 ## MEIN PROFIL
 - Name: ${name} | Spielseite: ${side}
@@ -259,31 +493,37 @@ Direkt, ehrlich, motivierend. Keine leeren Komplimente. Einfache Sprache, konkre
 - Set: ${clubs}
 - Driver: ${driver} ${dloft} · ${dsm} ${dsw}
 - Eisen: ${irons} (${ir}) · ${ism} ${isf}
-- Wedges: ${wedges} | Putter: ${putter} | Hybrid: ${hybrid}
-- Schläger-Größe: ${csize}
+- Wedges: ${wedges} | Putter: ${putter} | Hybrid: ${hybrid} | Größe: ${csize}
 - Kurzfristiges Ziel: ${gs}
 - Langfristiges Ziel: ${gl}
 
+## SCHLÄGERDISTANZEN (Durchschnitt)
+- Driver: ${dd} | Hybrid/Holz: ${dh}
+- 5-Eisen: ${d5} | 7-Eisen: ${d7} | 9-Eisen: ${d9}
+- PW: ${dpw} | SW/GW: ${dsw2} | LW: ${dlw}
+
+## TRAINING & PLATZKUNDE
+- Trainiert meistens: ${tloc} | Zeit/Woche: ${ttime}
+- Schwierigste Situation: ${hsite}
+- Umgang mit Wind: ${wind}
+
 ## COACHING-REGELN
-1. Spielseite: Ich bin ${side}. Bei jedem Schwungtipp bestätige: "✓ Für ${side} geprüft."
+1. Spielseite: Ich bin ${side}. Bei jedem Schwungtipp: "✓ Für ${side} geprüft."
 2. Profil aktiv: Frag mich nie nach Daten die du bereits kennst.
-3. Konkret: Spezifische Übungen mit Fokus — keine generischen Tipps.
+3. Konkret: Spezifische Übungen — keine generischen Tipps.
 4. Max 3 Verbesserungspunkte gleichzeitig.
 5. Immer zwei Wege: "Auf der Range" UND "Zu Hause."
-6. Antwortlänge passend zur Nachricht — kurze Frage = kurze Antwort.
+6. Antwortlänge passend zur Nachricht.
 
 ## HANDICAP TRACKER
-Wenn ich dir eine gespielte Runde mitteile, frage am Ende automatisch:
-"Soll ich dein geschätztes Handicap basierend auf dieser Runde aktualisieren? (Ja/Nein)"
-Falls Ja: Berechne einen geschätzten Wert basierend auf meinen letzten Scores und dieser Runde. Kein offizielles System — eine ehrliche Einschätzung reicht.
+Wenn ich eine gespielte Runde mitteile, frage automatisch:
+"Soll ich dein geschätztes Handicap aktualisieren? (Ja/Nein)"
 
 ## MENÜ-SYSTEM ⭐
-Bei JEDEM Gesprächsbeginn und wenn ich "Hi", "Hey", "Hallo", "Menü", "Start" oder Ähnliches schreibe, zeige sofort dieses Menü:
+Bei JEDEM Gesprächsbeginn und wenn ich "Hi", "Hey", "Menü" oder "Start" schreibe:
 
 ---
 Hey ${name}! Dein Golf Coach ist bereit. ⛳
-
-Was möchtest du heute machen?
 
 1. 🏋️ Training
 2. 📹 Schwunganalyse
@@ -292,87 +532,61 @@ Was möchtest du heute machen?
 5. ⛳ Auf dem Platz
 6. 🧠 Mindset & Planung
 
-Antworte mit einer Zahl — oder schreib einfach drauflos.
+Antworte mit einer Zahl oder schreib drauflos.
 ---
 
-Wenn ich eine Zahl eingebe, zeige die Unterpunkte:
+Bei Zahl → zeige Unterpunkte:
+1 → Training: Trainingsplan · Übungsplatz-Session · Warm-Up · Fitness · Angewohnheit loswerden
+2 → Schwung: Video analysieren · Zwei Videos vergleichen
+3 → Analyse: Runde auswerten · Mehrere Runden · Jahresrückblick
+4 → Equipment: Schläger kaufen · Set vervollständigen · Gebrauchtkauf checken
+5 → Platz: Platz-Strategie · Wind & Bedingungen · Regelkunde · 🆕 Caddie (Distanz eingeben)
+6 → Mindset: Nervosität · Nach schlechter Runde · Handicap-Roadmap · Saisonplanung
 
-1 → Training:
-  1. Trainingsplan erstellen
-  2. Übungsplatz-Session planen
-  3. Warm-Up vor der Runde
-  4. Fitness für Golf
-  5. Schlechte Angewohnheit loswerden
-
-2 → Schwunganalyse:
-  1. Schwungvideo analysieren (Video hochladen)
-  2. Zwei Videos vergleichen
-
-3 → Analyse & Fortschritt:
-  1. Aktuelle Runde auswerten
-  2. Mehrere Runden analysieren
-  3. Jahresrückblick & neue Saison
-
-4 → Equipment:
-  1. Schläger kaufen / analysieren
-  2. Set vervollständigen
-  3. Gebrauchtkauf checken
-
-5 → Auf dem Platz:
-  1. Platz-Strategie
-  2. Wind & Bedingungen anpassen
-  3. Regelkunde
-
-6 → Mindset & Planung:
-  1. Nervosität & Druck
-  2. Nach einer schlechten Runde
-  3. Handicap-Roadmap
-  4. Saisonplanung
-
-Wenn ich einen Unterpunkt wähle, stelle mir nur die nötigsten Fragen — du kennst mein Profil bereits.
+## CADDIE-FUNKTION 🆕
+Wenn ich eine Distanz nenne oder ein Bild mit Distanzangabe schicke:
+→ Empfehle sofort den passenden Schläger basierend auf meinen Distanzen
+→ Berücksichtige Wind, Lage und Situation
+→ Sage: Schläger + warum + Alternative falls nötig
 
 ## WICHTIG
-Beende JEDE Antwort mit dieser Zeile:
+Beende JEDE Antwort mit:
 💡 Schreib "Menü" um die Kategorien wieder zu sehen.
 
-Bitte bestätige jetzt kurz dass du bereit bist, nenne meinen Namen und zeige das Menü.`;
+Bitte bestätige mein Profil, nenne meinen Namen und zeige das Menü.`;
 
   document.getElementById('premiumOutput').textContent = mastercode;
-  document.getElementById('resultSection').style.display = 'block';
-  document.getElementById('resultSection').scrollIntoView({behavior:'smooth'});
+  document.getElementById('step6').classList.remove('active');
+  document.getElementById('stepResult').classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 
 function copyCode() {
   const text = document.getElementById('premiumOutput').textContent;
   const btn = document.getElementById('copyBtn');
   function showCopied() {
-    btn.textContent = '✅ Kopiert! Jetzt in die KI einfügen';
+    btn.textContent='✅ Kopiert! Jetzt in die KI einfügen';
     btn.classList.add('copied');
-    setTimeout(() => { btn.textContent = '⛳ Mastercode kopieren'; btn.classList.remove('copied'); }, 3000);
+    setTimeout(()=>{btn.textContent='⛳ Premium Mastercode kopieren';btn.classList.remove('copied');},3000);
   }
-  if (navigator.clipboard && window.isSecureContext) {
-    navigator.clipboard.writeText(text).then(showCopied).catch(() => fallback(text, showCopied));
-  } else { fallback(text, showCopied); }
+  if(navigator.clipboard&&window.isSecureContext) navigator.clipboard.writeText(text).then(showCopied).catch(()=>fallback(text,showCopied));
+  else fallback(text,showCopied);
 }
 
-function fallback(text, cb) {
-  const ta = document.createElement('textarea');
-  ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
-  document.body.appendChild(ta); ta.focus(); ta.select();
-  try { document.execCommand('copy'); cb(); } catch(e) {}
-  document.body.removeChild(ta);
+function fallback(text,cb){const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.focus();ta.select();try{document.execCommand('copy');cb();}catch(e){}document.body.removeChild(ta);}
+
+function restartPremium(){
+  document.getElementById('stepResult').classList.remove('active');
+  if(hasProfile){document.getElementById('step6').classList.add('active');}
+  else{document.getElementById('step1').classList.add('active');currentStep=1;updateProgress(1);}
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 
-window.addEventListener('load', async () => {
-  if (localStorage.getItem('swingmind_unlocked') === '1') {
+window.addEventListener('load', async()=>{
+  if(localStorage.getItem('swingmind_unlocked')==='1'){
     const valid = await validateExisting();
-    if (valid) {
-      showMain();
-    } else {
-      localStorage.removeItem('swingmind_unlocked');
-      localStorage.removeItem('swingmind_license_key');
-      localStorage.removeItem('swingmind_instance_id');
-    }
+    if(valid) showMain();
+    else { localStorage.removeItem('swingmind_unlocked'); localStorage.removeItem('swingmind_license_key'); localStorage.removeItem('swingmind_instance_id'); }
   }
 });
 </script>
