@@ -239,22 +239,54 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:1.1rem
     <div class="step-title">Premium Extras ⭐</div>
     <div class="step-sub">Diese Infos machen deinen Coach deutlich präziser.</div>
 
-    <div class="section-divider">Schlägerdistanzen (grob reicht)</div>
+    <div class="section-divider">Schlägerdistanzen — nur ausfüllen was du hast</div>
+
+    <div style="font-size:.75rem;color:var(--green);letter-spacing:.06em;text-transform:uppercase;margin-bottom:.5rem">Hölzer</div>
     <div class="field-grid">
       <div class="field"><label>Driver</label><input type="text" id="dist_driver" placeholder="~190m"></div>
-      <div class="field"><label>Hybrid / Holz</label><input type="text" id="dist_hybrid" placeholder="~170m"></div>
+      <div class="field"><label>3-Holz</label><input type="text" id="dist_3w" placeholder="~175m"></div>
     </div>
     <div class="field-grid">
-      <div class="field"><label>5-Eisen</label><input type="text" id="dist_5i" placeholder="~155m"></div>
-      <div class="field"><label>7-Eisen</label><input type="text" id="dist_7i" placeholder="~135m"></div>
+      <div class="field"><label>5-Holz</label><input type="text" id="dist_5w" placeholder="~160m"></div>
+      <div class="field"><label>7-Holz</label><input type="text" id="dist_7w" placeholder="~150m"></div>
+    </div>
+
+    <div style="font-size:.75rem;color:var(--green);letter-spacing:.06em;text-transform:uppercase;margin:.75rem 0 .5rem">Hybride</div>
+    <div class="field-grid">
+      <div class="field"><label>2-Hybrid</label><input type="text" id="dist_2h" placeholder="~185m"></div>
+      <div class="field"><label>3-Hybrid</label><input type="text" id="dist_3h" placeholder="~170m"></div>
     </div>
     <div class="field-grid">
-      <div class="field"><label>9-Eisen</label><input type="text" id="dist_9i" placeholder="~115m"></div>
+      <div class="field"><label>4-Hybrid</label><input type="text" id="dist_4h" placeholder="~158m"></div>
+      <div class="field"><label>5-Hybrid</label><input type="text" id="dist_5h" placeholder="~148m"></div>
+    </div>
+
+    <div style="font-size:.75rem;color:var(--green);letter-spacing:.06em;text-transform:uppercase;margin:.75rem 0 .5rem">Eisen</div>
+    <div class="field-grid">
+      <div class="field"><label>3-Eisen</label><input type="text" id="dist_3i" placeholder="~170m"></div>
+      <div class="field"><label>4-Eisen</label><input type="text" id="dist_4i" placeholder="~160m"></div>
+    </div>
+    <div class="field-grid">
+      <div class="field"><label>5-Eisen</label><input type="text" id="dist_5i" placeholder="~150m"></div>
+      <div class="field"><label>6-Eisen</label><input type="text" id="dist_6i" placeholder="~140m"></div>
+    </div>
+    <div class="field-grid">
+      <div class="field"><label>7-Eisen</label><input type="text" id="dist_7i" placeholder="~130m"></div>
+      <div class="field"><label>8-Eisen</label><input type="text" id="dist_8i" placeholder="~120m"></div>
+    </div>
+    <div class="field-grid">
+      <div class="field"><label>9-Eisen</label><input type="text" id="dist_9i" placeholder="~110m"></div>
       <div class="field"><label>Pitching Wedge</label><input type="text" id="dist_pw" placeholder="~95m"></div>
     </div>
+
+    <div style="font-size:.75rem;color:var(--green);letter-spacing:.06em;text-transform:uppercase;margin:.75rem 0 .5rem">Wedges</div>
     <div class="field-grid">
-      <div class="field"><label>Sand/Gap Wedge</label><input type="text" id="dist_sw" placeholder="~75m"></div>
-      <div class="field"><label>Lob Wedge</label><input type="text" id="dist_lw" placeholder="~55m"></div>
+      <div class="field"><label>Gap Wedge (AW)</label><input type="text" id="dist_gw" placeholder="~80m"></div>
+      <div class="field"><label>Sand Wedge (SW)</label><input type="text" id="dist_sw" placeholder="~65m"></div>
+    </div>
+    <div class="field-grid">
+      <div class="field"><label>Lob Wedge (LW)</label><input type="text" id="dist_lw" placeholder="~50m"></div>
+      <div class="field"><label>Extra Wedge</label><input type="text" id="dist_xw" placeholder="z.B. 60° ~40m"></div>
     </div>
 
     <div class="section-divider">Trainingsgewohnheiten</div>
@@ -441,7 +473,7 @@ function v(id){ const el=document.getElementById(id); return el?(el.value||'—'
 function generatePremium() {
   // Save premium data
   const premData = {};
-  ['dist_driver','dist_hybrid','dist_5i','dist_7i','dist_9i','dist_pw','dist_sw','dist_lw','train_loc','train_time','hard_sit','wind_exp'].forEach(k=>{
+  ['dist_driver','dist_3w','dist_5w','dist_7w','dist_2h','dist_3h','dist_4h','dist_5h','dist_3i','dist_4i','dist_5i','dist_6i','dist_7i','dist_8i','dist_9i','dist_pw','dist_gw','dist_sw','dist_lw','dist_xw','train_loc','train_time','hard_sit','wind_exp'].forEach(k=>{
     const el=document.getElementById(k); if(el) premData[k]=el.value||'';
   });
 
@@ -498,9 +530,10 @@ Direkt, ehrlich, motivierend. Keine leeren Komplimente. Einfache Sprache, konkre
 - Langfristiges Ziel: ${gl}
 
 ## SCHLÄGERDISTANZEN (Durchschnitt)
-- Driver: ${dd} | Hybrid/Holz: ${dh}
-- 5-Eisen: ${d5} | 7-Eisen: ${d7} | 9-Eisen: ${d9}
-- PW: ${dpw} | SW/GW: ${dsw2} | LW: ${dlw}
+Hölzer: Driver ${dd} | 3-Holz ${premData.dist_3w||'—'} | 5-Holz ${premData.dist_5w||'—'} | 7-Holz ${premData.dist_7w||'—'}
+Hybride: 2H ${premData.dist_2h||'—'} | 3H ${premData.dist_3h||'—'} | 4H ${premData.dist_4h||'—'} | 5H ${premData.dist_5h||'—'}
+Eisen: 3 ${premData.dist_3i||'—'} | 4 ${premData.dist_4i||'—'} | 5 ${d5} | 6 ${premData.dist_6i||'—'} | 7 ${d7} | 8 ${premData.dist_8i||'—'} | 9 ${d9}
+Wedges: PW ${dpw} | GW ${premData.dist_gw||'—'} | SW ${dsw2} | LW ${dlw} | Extra ${premData.dist_xw||'—'}
 
 ## TRAINING & PLATZKUNDE
 - Trainiert meistens: ${tloc} | Zeit/Woche: ${ttime}
