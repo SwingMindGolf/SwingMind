@@ -368,6 +368,7 @@ function v(id){ const el=document.getElementById(id); return el?(el.value||'—'
 
 function generatePrompt() {
   if (!validate(5)) return;
+  gtag('event', 'mastercode_generated', {'event_category': 'engagement', 'event_label': 'free'});
   document.getElementById('step5').classList.remove('active');
   document.getElementById('stepResult').classList.add('active');
   window.scrollTo({top:0,behavior:'smooth'});
@@ -461,6 +462,7 @@ Bitte bestätige mein Profil, nenne meinen Namen und sag in 2–3 Sätzen wie du
 }
 
 function copyPrompt() {
+  gtag('event', 'mastercode_copied', {'event_category': 'engagement', 'event_label': 'free'});
   const text = document.getElementById('promptOutput').textContent;
   const btn = document.getElementById('copyBtn');
   function showCopied() {

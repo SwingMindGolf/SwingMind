@@ -482,6 +482,7 @@ function goBackFromStep6() {
 function v(id){ const el=document.getElementById(id); return el?(el.value||'—'):'—'; }
 
 function generatePremium() {
+  gtag('event', 'mastercode_generated', {'event_category': 'engagement', 'event_label': 'premium'});
   // Save premium data
   const premData = {};
   ['dist_driver','dist_3w','dist_5w','dist_7w','dist_2h','dist_3h','dist_4h','dist_5h','dist_3i','dist_4i','dist_5i','dist_6i','dist_7i','dist_8i','dist_9i','dist_pw','dist_gw','dist_sw','dist_lw','dist_xw','train_loc','train_time','hard_sit','wind_exp'].forEach(k=>{
@@ -606,6 +607,7 @@ Bitte bestätige mein Profil, nenne meinen Namen und zeige das Menü.`;
 }
 
 function copyCode() {
+  gtag('event', 'mastercode_copied', {'event_category': 'engagement', 'event_label': 'premium'});
   const text = document.getElementById('premiumOutput').textContent;
   const btn = document.getElementById('copyBtn');
   function showCopied() {
