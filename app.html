@@ -1047,6 +1047,58 @@ function editProfile(){ localStorage.removeItem('sm_p');P=null;location.reload()
 function clearChat(){ msgs=[];localStorage.removeItem('sm_msgs');var c=document.getElementById('msgs');if(c)c.innerHTML='';var w=document.getElementById('welcomeDiv');if(w)w.style.display='block'; }
 function resetAll(){ localStorage.clear();location.reload(); }
 
+// ── THEME PICKER ──
+function pickTheme(t){
+  document.documentElement.setAttribute('data-theme',t);
+  localStorage.setItem('sm_theme',t);
+  const tog=document.getElementById('themeToggle');
+  if(tog) tog.checked=(t==='light');
+  document.getElementById('themePicker').classList.remove('active');
+  if(P) showApp(); else showOb();
+}
+
+// ── MICROPHONE ──
+let recognition=null;let micActive=false;
+function toggleMic(){
+  if(!('webkitSpeechRecognition' in window)&&!('SpeechRecognition' in window)){
+    alert('Spracherkennung wird in diesem Browser nicht unterstützt. Bitte Chrome verwenden.');return;
+  }
+  if(micActive){stopMic();return;}
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  recognition=new SR();
+  recognition.lang='de-DE';
+  recognition.continuous=false;
+  recognition.interimResults=true;
+  recognition.onstart=()=>{
+    micActive=true;
+    document.getElementById('micBtn').style.background='var(--green)';
+    document.getElementById('micBtn').style.color='#080f0a';
+    document.getElementById('chatIn').placeholder='Spreche jetzt...';
+  };
+  recognition.onresult=(e)=>{
+    const transcript=Array.from(e.results).map(r=>r[0].transcript).join('');
+    document.getElementById('chatIn').value=transcript;
+    resize(document.getElementById('chatIn'));
+  };
+  recognition.onend=()=>{
+    micActive=false;
+    document.getElementById('micBtn').style.background='';
+    document.getElementById('micBtn').style.color='';
+    document.getElementById('chatIn').placeholder='Schreib deinem Coach...';
+    const txt=document.getElementById('chatIn').value.trim();
+    if(txt) setTimeout(send,300);
+  };
+  recognition.onerror=()=>{stopMic();};
+  recognition.start();
+}
+function stopMic(){
+  if(recognition){recognition.stop();recognition=null;}
+  micActive=false;
+  document.getElementById('micBtn').style.background='';
+  document.getElementById('micBtn').style.color='';
+  document.getElementById('chatIn').placeholder='Schreib deinem Coach...';
+}
+
 // ── AVATAR ──
 function loadAv(){
   var av=localStorage.getItem('sm_av'); if(!av) return;
