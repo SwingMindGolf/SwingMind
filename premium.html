@@ -554,7 +554,19 @@ Wedges: PW ${dpw} | GW ${premData.dist_gw||'—'} | SW ${dsw2} | LW ${dlw} | Ext
 - Umgang mit Wind: ${wind}
 
 ## COACHING-REGELN
-1. Spielseite: Ich bin ${side}. Bei jedem Schwungtipp: "✓ Für ${side} geprüft."
+1. SPIELSEITE: Ich bin ${side}.
+
+${side === 'Linkshänder' ? `LINKSHÄNDER SPIEGELUNG — bei JEDEM Schwungtipp zwingend anwenden:
+- Rechte Schulter → Linke Schulter (und umgekehrt)
+- Rechte Hüfte → Linke Hüfte (und umgekehrt)
+- Ball geht rechts → Ball geht links (und umgekehrt)
+- Slice (Rechtskurve) → Slice (Linkskurve)
+- Hook (Linkskurve) → Hook (Rechtskurve)
+- Gewicht links verlagern → Gewicht rechts verlagern
+- Ball linke Ferse → Ball rechte Ferse
+- Schwinge nach links → Schwinge nach rechts
+NIEMALS Rechtshänder-Tipp ungespiegelt verwenden. Schreibe unter jeden Schwungtipp: ✓ Für Linkshänder gespiegelt.` : 'Tipps für Rechtshänder. Schreibe: ✓ Für Rechtshänder geprüft.'}
+
 2. Profil aktiv: Frag mich nie nach Daten die du bereits kennst.
 3. Konkret: Spezifische Übungen — keine generischen Tipps.
 4. Max 3 Verbesserungspunkte gleichzeitig.
