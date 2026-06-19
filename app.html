@@ -229,6 +229,8 @@ input:checked+.tsl::before{transform:translateX(18px);background:#080f0a}
 /* ── ANIMS ── */
 @keyframes fadeUp{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
 .mwrap,.typing{animation:fadeUp .22s ease both}
+.search-hl{background:rgba(250,200,0,0.35);border-radius:2px}
+.search-hl.active{background:rgba(250,150,0,0.55)}
 </style>
 </head>
 <body>
@@ -240,7 +242,9 @@ input:checked+.tsl::before{transform:translateX(18px);background:#080f0a}
 <!-- ═══════════ ONBOARDING ═══════════ -->
 <div id="onboarding" class="on">
 <div class="ob-inner">
-  <div class="ob-logo"><span>Swing</span>Mind</div>
+  <div class="ob-logo" style="position:relative"><span>Swing</span>Mind
+    <button id="obCancelBtn" onclick="cancelEdit()" style="display:none;position:absolute;right:0;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);font-size:.8rem;cursor:pointer;font-family:inherit">Abbrechen</button>
+  </div>
 
   <!-- S1 -->
   <div class="ob-step on" id="s1">
@@ -363,12 +367,31 @@ input:checked+.tsl::before{transform:translateX(18px);background:#080f0a}
 <!-- ═══════════ APP ═══════════ -->
 <div id="app">
   <div class="hdr">
-    <div class="hdr-logo"><span>Swing</span>Mind</div>
+    <div class="hdr-logo" onclick="showWelcome()" style="cursor:pointer"><span>Swing</span>Mind</div>
     <div class="hdr-r">
-      <span class="ppill" id="ppill">PREMIUM</span>
-      <span class="mlim" id="mlim">10 heute</span>
+      <span class="ppill" id="ppill" onclick="openPM()" style="cursor:pointer">PREMIUM</span>
+      <span class="mlim" id="mlim" onclick="openPM()" style="cursor:pointer">10 heute</span>
+      <button id="searchBtn" onclick="toggleSearch()" style="background:none;border:none;cursor:pointer;color:var(--muted);padding:.2rem;display:flex;align-items:center" title="Suchen">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      </button>
       <div class="av" id="avBtn" onclick="goTab('settings')">M</div>
     </div>
+  </div>
+
+  <!-- SEARCH BAR -->
+  <div id="searchBar" style="display:none;padding:.6rem 1rem;background:var(--bg);border-bottom:1px solid var(--border);gap:.5rem;align-items:center">
+    <div style="flex:1;background:var(--card);border:1.5px solid var(--border2);border-radius:100px;display:flex;align-items:center;padding:.45rem .85rem;gap:.4rem">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted2)" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input id="searchInput" type="text" placeholder="Im Chat suchen..." style="flex:1;background:none;border:none;outline:none;font-size:.875rem;color:var(--text);font-family:inherit" oninput="doSearch(this.value)">
+    </div>
+    <span id="searchCount" style="font-size:.72rem;color:var(--muted);white-space:nowrap;min-width:40px;text-align:center"></span>
+    <button onclick="searchNav(-1)" style="background:none;border:none;cursor:pointer;color:var(--muted);padding:.2rem" id="searchUp">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
+    </button>
+    <button onclick="searchNav(1)" style="background:none;border:none;cursor:pointer;color:var(--muted);padding:.2rem" id="searchDown">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <button onclick="closeSearch()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:1.1rem;padding:.1rem">×</button>
   </div>
 
   <div class="tabs-wrap">
@@ -392,6 +415,9 @@ input:checked+.tsl::before{transform:translateX(18px);background:#080f0a}
           </label>
           <input type="file" id="vidIn" accept="video/*" style="display:none" onchange="onVid(this)">
           <textarea class="ita" id="chatIn" placeholder="Schreib deinem Coach..." rows="1" onkeydown="onKey(event)" oninput="rsz(this)"></textarea>
+          <button class="abtn" id="micBtn" onclick="toggleMic()" title="Diktieren">
+            <svg id="micIcon" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+          </button>
           <button class="sbtn" id="sendB" onclick="send()">
             <svg viewBox="0 0 24 24"><path d="M2 12L22 2L12 22L10 14L2 12Z"/></svg>
           </button>
@@ -425,6 +451,9 @@ input:checked+.tsl::before{transform:translateX(18px);background:#080f0a}
           </div>
           <div id="scoreC"></div>
         </div>
+        <div class="cc" id="dispCard"></div>
+        <div class="cc" id="errCard"></div>
+        <div class="cc" id="goalCard"></div>
         <div class="cc"><div class="ct2">Letzte Runden</div><div id="roundsL"></div></div>
       </div>
     </div>
@@ -512,7 +541,7 @@ input:checked+.tsl::before{transform:translateX(18px);background:#080f0a}
   </div>
 
   <div class="bnav">
-    <div class="bn on" id="bn-coach" onclick="goTab('coach')">
+    <div class="bn on" id="bn-coach" onclick="showWelcome()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
       <span>Coach</span>
     </div>
@@ -544,10 +573,27 @@ input:checked+.tsl::before{transform:translateX(18px);background:#080f0a}
     </div>
     <div class="g2">
       <div class="f"><label>Score <em>*</em></label><input type="number" id="rs" placeholder="54"></div>
-      <div class="f"><label>Putts</label><input type="number" id="rp" placeholder="18"></div>
+      <div class="f"><label>Bewertung</label>
+        <select id="rp"><option value="">Wählen</option><option value="5">⭐⭐⭐⭐⭐ Sehr gut</option><option value="4">⭐⭐⭐⭐ Gut</option><option value="3">⭐⭐⭐ Ok</option><option value="2">⭐⭐ Schlecht</option><option value="1">⭐ Sehr schlecht</option></select>
+      </div>
+    </div>
+    <div class="g2">
+      <div class="f"><label>Wetter</label>
+        <select id="rweather"><option value="">Wählen</option><option>Sonnig</option><option>Bewölkt</option><option>Windig</option><option>Regen</option><option>Kalt</option></select>
+      </div>
+      <div class="f"><label>Gespielt mit</label>
+        <select id="rwith"><option value="">Wählen</option><option>Solo</option><option>Freunde</option><option>Turnier</option><option>Platzreife</option></select>
+      </div>
     </div>
     <div class="f"><label>Abschlag-Richtung</label>
-      <div class="opts"><div class="opt" onclick="pick(this,'rdir','Gerade')">Gerade</div><div class="opt" onclick="pick(this,'rdir','Rechts')">Rechts</div><div class="opt" onclick="pick(this,'rdir','Links')">Links</div><div class="opt" onclick="pick(this,'rdir','Gemischt')">Gemischt</div></div>
+      <div class="opts" style="grid-template-columns:1fr 1fr 1fr">
+        <div class="opt" onclick="pick(this,'rdir','Gerade')">Gerade</div>
+        <div class="opt" onclick="pick(this,'rdir','Leicht rechts')">Leicht rechts</div>
+        <div class="opt" onclick="pick(this,'rdir','Stark rechts')">Stark rechts</div>
+        <div class="opt" onclick="pick(this,'rdir','Leicht links')">Leicht links</div>
+        <div class="opt" onclick="pick(this,'rdir','Stark links')">Stark links</div>
+        <div class="opt" onclick="pick(this,'rdir','Gemischt')">Gemischt</div>
+      </div>
       <input type="hidden" id="rdir">
     </div>
     <div class="f"><label>Notizen</label><textarea id="rn" placeholder="Was lief gut / schlecht?" rows="2" style="background:var(--card2);border:1.5px solid var(--bdr2);border-radius:12px;padding:.75rem 1rem;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.95rem;outline:none;width:100%;resize:none"></textarea></div>
@@ -562,13 +608,33 @@ input:checked+.tsl::before{transform:translateX(18px);background:#080f0a}
     <button class="mx" onclick="closePM()">×</button>
     <div class="mhandle"></div>
     <div class="mh">Premium freischalten ⭐</div>
-    <div class="ms">Gib deinen Zugangscode ein — du bekommst ihn nach dem Kauf per E-Mail.</div>
-    <input class="mc" id="pmCode" placeholder="*******" maxlength="64" onkeydown="if(event.key==='Enter')doUnlock()">
+    <div class="ms">Wähle deinen Plan oder gib deinen Zugangscode ein.</div>
+
+    <!-- Plan Auswahl -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1.1rem">
+      <a href="https://swingmind.lemonsqueezy.com/checkout/buy/e5b73342-69ce-49d0-a276-933b627e8a4f" target="_blank" onclick="closePM()" style="text-decoration:none;background:var(--card2);border:1.5px solid var(--border2);border-radius:14px;padding:1rem .85rem;display:block;transition:all .2s">
+        <div style="font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.3rem">Monatlich</div>
+        <div style="font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;color:var(--text);line-height:1">6,99€</div>
+        <div style="font-size:.7rem;color:var(--muted);margin-top:.2rem">pro Monat · jederzeit kündbar</div>
+      </a>
+      <a href="https://swingmind.lemonsqueezy.com/checkout/buy/58e698e0-d0dc-4a15-8c1f-c3fce0e6ef9a" target="_blank" onclick="closePM()" style="text-decoration:none;background:var(--green-dim);border:1.5px solid var(--border2);border-radius:14px;padding:1rem .85rem;display:block;position:relative;overflow:hidden;transition:all .2s">
+        <div style="position:absolute;top:.45rem;right:.45rem;background:var(--green);color:#080f0a;font-size:.58rem;font-weight:800;padding:.15rem .45rem;border-radius:100px;letter-spacing:.03em">-40%</div>
+        <div style="font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.3rem">Jährlich</div>
+        <div style="font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;color:var(--text);line-height:1">49,99€</div>
+        <div style="font-size:.7rem;color:var(--muted);margin-top:.2rem">pro Jahr · spart 33,89€</div>
+      </a>
+    </div>
+
+    <!-- Divider -->
+    <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.85rem">
+      <div style="flex:1;height:1px;background:var(--border)"></div>
+      <span style="font-size:.72rem;color:var(--muted2)">bereits gekauft?</span>
+      <div style="flex:1;height:1px;background:var(--border)"></div>
+    </div>
+
+    <input class="mc" id="pmCode" placeholder="Zugangscode eingeben" maxlength="64" onkeydown="if(event.key==='Enter')doUnlock()">
     <button class="mb" id="pmBtn" onclick="doUnlock()">Freischalten →</button>
     <div class="merr" id="pmErr"></div>
-    <div style="text-align:center;margin-top:.85rem;font-size:.78rem;color:var(--muted)">
-      Noch kein Premium? <a href="https://swingmind.lemonsqueezy.com/checkout/buy/c6f84682-4fcc-4439-8de5-c48cb356e958" target="_blank" style="color:var(--green)">Jetzt kaufen →</a>
-    </div>
   </div>
 </div>
 
@@ -699,6 +765,17 @@ function updHdr(){
 }
 
 // ── TABS ──
+function showWelcome(){
+  goTab('coach');
+  var w=document.getElementById('welcomeDiv');
+  var m=document.getElementById('msgs');
+  if(w) w.style.display='block';
+  if(m) m.style.display='none';
+  buildCats();
+  renderHints();
+  var g=document.getElementById('wgreet');
+  if(g&&P) g.textContent='Hey '+(P.name||'').split(' ')[0]+'!';
+}
 function goTab(t){
   document.querySelectorAll('.tab').forEach(function(el){el.classList.remove('on');});
   document.querySelectorAll('.bn').forEach(function(el){el.classList.remove('on');});
@@ -723,13 +800,7 @@ function selCat(c){
   hideWel();
   var txt=c.i+' *'+c.n+'* — was möchtest du heute machen?\n\n'+c.prompts.map(function(p,i){return (i+1)+'. '+p;}).join('\n');
   addAI(txt);
-  var row=document.getElementById('hints'); if(!row) return;
-  row.innerHTML='';
-  c.prompts.forEach(function(p,i){
-    var ch=document.createElement('div'); ch.className='hchip'; ch.textContent=(i+1)+'. '+p;
-    ch.onclick=function(){ document.getElementById('chatIn').value=String(i+1); send(); };
-    row.appendChild(ch);
-  });
+  renderHints(c.prompts.map(function(p,i){ return (i+1)+'. '+p; }));
 }
 
 // ── MESSAGES ──
@@ -765,7 +836,10 @@ function addAI(t){
 function saveMsgs(){ localStorage.setItem('sm_msgs',JSON.stringify(msgs.slice(-120))); }
 function showTyp(){ var c=document.getElementById('msgs'); if(!c) return; var e=document.createElement('div'); e.className='typing'; e.id='typ'; e.innerHTML='<div class="td"></div><div class="td"></div><div class="td"></div>'; c.appendChild(e); scrollB(); }
 function hideTyp(){ var e=document.getElementById('typ'); if(e) e.remove(); }
-function hideWel(){ var w=document.getElementById('welcomeDiv'); if(w) w.style.display='none'; }
+function hideWel(){
+  var w=document.getElementById('welcomeDiv'); if(w) w.style.display='none';
+  var m=document.getElementById('msgs'); if(m) m.style.display='block';
+}
 function scrollB(){ setTimeout(function(){ var s=document.getElementById('chatScroll'); if(s) s.scrollTop=99999; },60); }
 function fmtT(d){ return d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}); }
 
@@ -821,11 +895,17 @@ function showLim(){
   scrollB();
 }
 function onVid(inp){ if(!prem){openPM();inp.value='';return;} if(inp.files[0]){pendVid=inp.files[0]; var ta=document.getElementById('chatIn'); if(ta) ta.placeholder='Video: '+pendVid.name;} }
-function renderHints(){
+function renderHints(subPrompts){
   var row=document.getElementById('hints'); if(!row) return; row.innerHTML='';
-  ['Menü','Runde auswerten','Trainingsplan','Schläger-Tipp','Caddie'].forEach(function(h){
+  // Menü always first
+  var all=subPrompts&&subPrompts.length?subPrompts:['Runde auswerten','Trainingsplan','Schläger-Tipp'];
+  var chips=['Menü'].concat(all);
+  chips.forEach(function(h){
     var c=document.createElement('div'); c.className='hchip'; c.textContent=h;
-    c.onclick=function(){ var ta=document.getElementById('chatIn'); if(ta) ta.value=h; send(); };
+    c.onclick=(function(hint){ return function(){
+      if(hint==='Menü'){showWelcome();return;}
+      var ta=document.getElementById('chatIn'); if(ta) ta.value=hint; send();
+    }; })(h);
     row.appendChild(c);
   });
 }
@@ -858,7 +938,136 @@ function getFilteredRounds(){
   return r;
 }
 function renderStats(){
-  renderQS(); renderScoreChart(); renderRoundsL();
+  renderQS(); renderScoreChart(); renderDispersion(); renderErrPattern(); renderGoalCard(); renderRoundsL();
+}
+var dispFilter=10;
+function setDispFilter(n){
+  dispFilter=n;
+  document.querySelectorAll('.disp-filter-btn').forEach(function(b){ b.classList.remove('active'); });
+  var active=document.getElementById('df'+n); if(active) active.classList.add('active');
+  renderDispersion();
+}
+function renderDispersion(){
+  var el=document.getElementById('dispCard'); if(!el) return; el.innerHTML='';
+  var allWithDir=rounds.filter(function(r){return r.dir;});
+  var withDir=dispFilter===0?allWithDir:allWithDir.slice(-dispFilter);
+  if(withDir.length<1){
+    el.innerHTML='<div class="ct2">Abschlag-Streuung</div><div class="nodata">Trage 3+ Runden mit Abschlag-Richtung ein.</div>';
+    return;
+  }
+  var counts={'Gerade':0,'Leicht rechts':0,'Stark rechts':0,'Leicht links':0,'Stark links':0,'Gemischt':0};
+  withDir.forEach(function(r){
+    var d=r.dir||'';
+    if(counts[d]!==undefined){ counts[d]++; }
+    else if(d==='Rechts'||d==='rechts'){ counts['Leicht rechts']++; }
+    else if(d==='Links'||d==='links'){ counts['Leicht links']++; }
+    else if(d==='Gerade'||d==='gerade'){ counts['Gerade']++; }
+    else { counts['Gemischt']++; }
+  });
+  var total=withDir.length, side=(P&&P.side)||'';
+  var rightTotal=(counts['Leicht rechts']||0)+(counts['Stark rechts']||0);
+  var leftTotal=(counts['Leicht links']||0)+(counts['Stark links']||0);
+  var dominant=rightTotal>leftTotal?(counts['Stark rechts']>1?'Stark rechts':'Leicht rechts'):leftTotal>rightTotal?(counts['Stark links']>1?'Stark links':'Leicht links'):'Gerade';
+
+  // Build trajectory lines SVG
+  var seed=7919;
+  function rnd(mn,mx){seed=(seed*1664525+1013904223)>>>0;return mn+((seed>>>0)%1000)/1000*(mx-mn);}
+
+  var W=280,H=260,cx=W/2,ty=20,by=H-20;
+  var lines=[];
+
+  var dirCfg={
+    'Gerade':       {mn:-8,  mx:8,   c:'#16a34a'},
+    'Leicht rechts':{mn:18,  mx:48,  c:'#f59e0b'},
+    'Stark rechts': {mn:58,  mx:115, c:'#ef4444'},
+    'Leicht links': {mn:-48, mx:-18, c:'#22c55e'},
+    'Stark links':  {mn:-115,mx:-58, c:'#3b82f6'},
+    'Gemischt':     {mn:-38, mx:38,  c:'#a78bfa'}
+  };
+
+  Object.keys(counts).forEach(function(dir){
+    var n=counts[dir]; if(!n||!dirCfg[dir]) return;
+    var cfg=dirCfg[dir];
+    for(var i=0;i<n;i++){
+      var offset=rnd(cfg.mn,cfg.mx);
+      var ex=cx+offset+rnd(-5,5);
+      var ey=ty+rnd(0,22);
+      var cpx=cx+(offset*0.55)+rnd(-4,4);
+      var cpy=(by+ey)/2+rnd(-12,12);
+      lines.push({x1:cx,y1:by,x2:ex,y2:ey,cpx:cpx,cpy:cpy,c:cfg.c});
+    }
+  });
+
+  var pathsHtml=lines.map(function(l){
+    return '<path d="M'+l.x1+' '+l.y1+' Q'+l.cpx+' '+l.cpy+' '+l.x2+' '+l.y2+'" stroke="'+l.c+'" stroke-width="1.5" fill="none" opacity="0.8" stroke-linecap="round"/>';
+  }).join('');
+
+  var dotsHtml=lines.map(function(l){
+    return '<circle cx="'+l.x2+'" cy="'+l.y2+'" r="3.5" fill="'+l.c+'" opacity="0.9"/>'+
+           '<circle cx="'+l.x2+'" cy="'+l.y2+'" r="1.2" fill="white" opacity="0.6"/>';
+  }).join('');
+
+  // Fairway zone
+  var isDarkMode=document.documentElement.getAttribute('data-theme')==='dark';
+  var fwCol=isDarkMode?'#4ade80':'#16a34a';
+  var fw='<path d="M'+(cx-20)+' '+by+' L'+(cx+20)+' '+by+' L'+(cx+38)+' '+ty+' L'+(cx-38)+' '+ty+' Z" fill="'+fwCol+'" opacity="0.1"/>';
+  // Target line
+  var tl='<line x1="'+cx+'" y1="'+by+'" x2="'+cx+'" y2="'+ty+'" stroke="'+fwCol+'" stroke-width="1" stroke-dasharray="4 4" opacity="0.3"/>';
+  // Tee circle
+  var tee='<circle cx="'+cx+'" cy="'+by+'" r="5" fill="'+fwCol+'" opacity="0.6"/>';
+  // Labels
+  var lbl='<text x="12" y="'+(by-4)+'" font-size="10" fill="#7aad86" font-family="DM Sans,sans-serif">L</text>'+
+           '<text x="'+(W-16)+'" y="'+(by-4)+'" font-size="10" fill="#7aad86" font-family="DM Sans,sans-serif">R</text>'+
+           '<text x="'+cx+'" y="'+(ty-4)+'" font-size="9" fill="#7aad86" font-family="DM Sans,sans-serif" text-anchor="middle">ZIEL</text>';
+
+  var domCol=dominant.indexOf('rechts')>=0?'#ef4444':dominant.indexOf('links')>=0?'#3b82f6':fwCol;
+
+  var filterBtns='<div style="display:flex;gap:.3rem;margin-left:auto">'+
+    '<button class="flt'+(dispFilter===10?' on':'')+'" onclick="setDispFilter(10)">10</button>'+
+    '<button class="flt'+(dispFilter===30?' on':'')+'" onclick="setDispFilter(30)">30</button>'+
+    '<button class="flt'+(dispFilter===0?' on':'')+'" onclick="setDispFilter(0)">Alle</button>'+
+  '</div>';
+  el.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.1rem"><div class="ct2" style="margin:0">Abschlag-Streuung</div>'+filterBtns+'</div>'+
+    '<div class="cs">'+total+' Runden · '+side+'</div>'+
+    '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;max-width:300px;display:block;margin:.5rem auto">'+
+      fw+tl+tee+pathsHtml+dotsHtml+lbl+
+    '</svg>'+
+    '<div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;font-size:.65rem;color:var(--muted);margin-top:4px">'+
+      (counts["Gerade"]?'<span><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:'+(isDarkMode?'#4ade80':'#16a34a')+';margin-right:2px"></span>Gerade '+counts["Gerade"]+'×</span>':'')+
+      (counts["Leicht rechts"]?'<span><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#fbbf24;margin-right:2px"></span>L.rechts '+counts["Leicht rechts"]+'×</span>':'')+
+      (counts["Stark rechts"]?'<span><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#f87171;margin-right:2px"></span>S.rechts '+counts["Stark rechts"]+'×</span>':'')+
+      (counts["Leicht links"]?'<span><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#86efac;margin-right:2px"></span>L.links '+counts["Leicht links"]+'×</span>':'')+
+      (counts["Stark links"]?'<span><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#60a5fa;margin-right:2px"></span>S.links '+counts["Stark links"]+'×</span>':'')+
+      (counts["Gemischt"]?'<span><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#a78bfa;margin-right:2px"></span>Gemischt '+counts["Gemischt"]+'×</span>':'')+
+    '</div>'+
+    (dominant!=='Gerade'?
+      '<div style="margin-top:8px;background:var(--card2);border-radius:10px;padding:7px 10px;font-size:.7rem;color:var(--muted);text-align:center">'+
+      '<div style="margin-top:8px;background:var(--card2);border-radius:10px;padding:7px 10px;font-size:.7rem;color:var(--muted);text-align:center">Muster: <span style="color:'+domCol+';font-weight:600">'+(dominant==='Rechts'?'Tendenz rechts':'Tendenz links')+'</span></div>' : '');
+
+}
+function renderErrPattern(){
+  var el=document.getElementById('errCard'); if(!el) return;
+  var withLoss=rounds.filter(function(r){return r.loss;});
+  if(withLoss.length<2){
+    el.innerHTML='<div class="ct2">Fehler-Muster</div><div class="nodata">Trage 3+ Runden mit Fehler-Angabe ein.</div>';
+    return;
+  }
+  var counts={Abschlag:0,Kurzspiel:0,Putting:0,Bunker:0};
+  withLoss.forEach(function(r){if(counts[r.loss]!==undefined)counts[r.loss]++;});
+  var total=withLoss.length;
+  var colors={Abschlag:'#f87171',Kurzspiel:'#fbbf24',Putting:'#60a5fa',Bunker:'var(--green)'};
+  var bars=Object.entries(counts).map(function(e){
+    var pct=Math.round((e[1]/total)*100);
+    return '<div style="margin-bottom:.55rem"><div style="display:flex;justify-content:space-between;font-size:.75rem;margin-bottom:.25rem"><span>'+e[0]+'</span><span style="color:var(--muted)">'+e[1]+'× ('+pct+'%)</span></div><div style="background:var(--card2);border-radius:100px;height:6px;overflow:hidden"><div style="width:'+pct+'%;height:100%;background:'+colors[e[0]]+';border-radius:100px;transition:width .5s"></div></div></div>';
+  }).join('');
+  el.innerHTML='<div class="ct2">Fehler-Muster</div><div class="cs">Wo verlierst du die meisten Schläge?</div><div style="margin-top:.5rem">'+bars+'</div>';
+}
+function renderGoalCard(){
+  var el=document.getElementById('goalCard'); if(!el||!P) return;
+  el.innerHTML='<div class="ct2">Ziel & Fokus</div><div style="display:flex;flex-direction:column;gap:.4rem;margin-top:.5rem">'+
+    '<div style="background:var(--card2);border-radius:10px;padding:.65rem .8rem;border-left:3px solid var(--green)"><div style="font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.2rem">Kurzfristiges Ziel</div><div style="font-size:.85rem;font-weight:500">'+(P.gshort||'—')+'</div></div>'+
+    '<div style="background:var(--card2);border-radius:10px;padding:.65rem .8rem"><div style="font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.2rem">Aktuell geübt</div><div style="font-size:.85rem">'+(P.practicing||P.practice||'—')+'</div></div>'+
+    '<div style="background:var(--card2);border-radius:10px;padding:.65rem .8rem;border-left:3px solid #f87171"><div style="font-size:.65rem;color:#f87171;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.2rem">Größte Schwäche</div><div style="font-size:.85rem">'+(P.weaknesses||P.weak||'—')+'</div></div></div>';
 }
 function calcEstHcp(){
   if(rounds.length===0) return null;
@@ -959,26 +1168,82 @@ function scoreChart(rds){
   var labels=pts.map(function(p){ return '<text x="'+p.x+'" y="'+(p.y-8)+'" text-anchor="middle" font-size="8.5" fill="var(--muted)" font-family="DM Sans,sans-serif">'+p.v+'</text>'; }).join('');
   return '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;overflow:visible"><defs><linearGradient id="lg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--green)" stop-opacity=".18"/><stop offset="100%" stop-color="var(--green)" stop-opacity="0"/></linearGradient></defs><path d="'+area+'" fill="url(#lg2)"/><path d="'+path+'" fill="none" stroke="var(--green)" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>'+labels+dots+'</svg>';
 }
+var roundsPage=0;
+var ROUNDS_PREVIEW=3;
+var ROUNDS_PER_PAGE=10;
+var showAllRounds=false;
+
 function renderRoundsL(){
   var el=document.getElementById('roundsL'); if(!el) return; el.innerHTML='';
-  if(rounds.length===0){ el.innerHTML='<div class="nodata">Noch keine Runden<button onclick="openRM()">+ Runde eintragen</button></div>'; return; }
-  var wrap=document.createElement('div'); wrap.className='rlist';
+  if(rounds.length===0){
+    el.innerHTML='<div class="nodata">Noch keine Runden<br><button class="nodata-btn" onclick="openRM()">+ Runde eintragen</button></div>';
+    return;
+  }
   var src=[].concat(rounds).reverse();
-  src.forEach(function(r,revIdx){
-    var realIdx=rounds.length-1-revIdx;
-    var d=document.createElement('div'); d.className='rrow'; d.style.flexDirection='column'; d.style.alignItems='stretch';
-    d.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between">'+
-      '<div><div class="rcourse">'+(r.course||'Unbekannter Platz')+'</div>'+
-      '<div class="rdate">'+(r.date||'—')+' · '+(r.holes||9)+' Loch'+(r.dir?' · '+r.dir:'')+(r.notes?' · '+r.notes.slice(0,30):'')+'</div></div>'+
-      '<div><div class="rscore">'+r.score+'</div><div class="rholes">Score</div></div>'+
-    '</div>'+
-    '<div class="rrow-btns">'+
-      '<button class="rbtn" onclick="editRound('+realIdx+')">Bearbeiten</button>'+
-      '<button class="rbtn del" onclick="deleteRound('+realIdx+')">Löschen</button>'+
-    '</div>';
-    wrap.appendChild(d);
+
+  // Preview: nur erste 3
+  if(!showAllRounds){
+    var preview=src.slice(0,ROUNDS_PREVIEW);
+    var wrap=document.createElement('div'); wrap.className='rlist';
+    preview.forEach(function(r,i){
+      var realIdx=rounds.length-1-i;
+      wrap.appendChild(mkRoundRow(r,realIdx));
+    });
+    el.appendChild(wrap);
+    if(rounds.length>ROUNDS_PREVIEW){
+      var btn=document.createElement('button');
+      btn.style.cssText='width:100%;margin-top:.6rem;background:var(--card);border:1px solid var(--border2);border-radius:100px;padding:.65rem;font-size:.8rem;font-weight:500;color:var(--text);cursor:pointer;font-family:inherit';
+      btn.textContent='Alle '+rounds.length+' Runden anzeigen →';
+      btn.onclick=function(){ showAllRounds=true; roundsPage=0; renderRoundsL(); };
+      el.appendChild(btn);
+    }
+    return;
+  }
+
+  // Alle Runden mit Paginierung
+  var totalPages=Math.ceil(src.length/ROUNDS_PER_PAGE);
+  var pageSrc=src.slice(roundsPage*ROUNDS_PER_PAGE,(roundsPage+1)*ROUNDS_PER_PAGE);
+  var wrap=document.createElement('div'); wrap.className='rlist';
+  pageSrc.forEach(function(r,i){
+    var realIdx=rounds.length-1-(roundsPage*ROUNDS_PER_PAGE+i);
+    wrap.appendChild(mkRoundRow(r,realIdx));
   });
   el.appendChild(wrap);
+
+  // Seitenzahlen
+  if(totalPages>1){
+    var pag=document.createElement('div');
+    pag.style.cssText='display:flex;align-items:center;justify-content:center;gap:.4rem;margin-top:.85rem;flex-wrap:wrap';
+    for(var p=0;p<totalPages;p++){
+      var pb=document.createElement('button');
+      pb.textContent=p+1;
+      pb.style.cssText='width:34px;height:34px;border-radius:50%;border:1px solid var(--border2);background:'+(p===roundsPage?'var(--green)':'var(--card)')+';color:'+(p===roundsPage?'#080f0a':'var(--text)')+';font-size:.8rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s';
+      (function(page){ pb.onclick=function(){ roundsPage=page; renderRoundsL(); var el2=document.getElementById('roundsL');if(el2)el2.scrollIntoView({behavior:'smooth',block:'nearest'}); }; })(p);
+      pag.appendChild(pb);
+    }
+    el.appendChild(pag);
+  }
+
+  // Zurück zu Vorschau
+  var back=document.createElement('button');
+  back.style.cssText='width:100%;margin-top:.5rem;background:transparent;border:none;font-size:.75rem;color:var(--muted);cursor:pointer;padding:.4rem;font-family:inherit';
+  back.textContent='← Weniger anzeigen';
+  back.onclick=function(){ showAllRounds=false; roundsPage=0; renderRoundsL(); };
+  el.appendChild(back);
+}
+
+function mkRoundRow(r,realIdx){
+  var d=document.createElement('div'); d.className='rrow'; d.style.flexDirection='column'; d.style.alignItems='stretch';
+  d.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between">'+
+    '<div><div class="rcourse">'+(r.course||'Unbekannter Platz')+(r.weather?' '+r.weather:'')+'</div>'+
+    '<div class="rdate">'+(r.date||'—')+' · '+(r.holes||9)+' Loch'+(r.with?' · '+r.with:'')+(r.dir?' · '+r.dir:'')+'</div></div>'+
+    '<div style="text-align:right"><div class="rscore">'+r.score+'</div><div class="rholes">'+(r.rating?'★'.repeat(parseInt(r.rating)):'Score')+'</div></div>'+
+  '</div>'+
+  '<div class="rrow-btns">'+
+    '<button class="rbtn" onclick="editRound('+realIdx+')">Bearbeiten</button>'+
+    '<button class="rbtn del" onclick="deleteRound('+realIdx+')">Löschen</button>'+
+  '</div>';
+  return d;
 }
 
 // ── ROUNDS ──
@@ -986,7 +1251,7 @@ function openRM(){ var d=document.getElementById('rd'); if(d) d.value=new Date()
 function closeRM(){ editIdx=-1; var m=document.getElementById('rModal'); if(m) m.classList.remove('on'); }
 function saveRound(){
   var sc=document.getElementById('rs'); if(!sc||!sc.value){alert('Bitte Score eingeben.');return;}
-  var r={course:gv('rc')||'Runde',date:gv('rd')||new Date().toISOString().split('T')[0],holes:gv('rh')||'9',score:parseInt(sc.value),putts:gv('rp'),dir:gv('rdir'),notes:gv('rn')};
+  var r={course:gv('rc')||'Runde',date:gv('rd')||new Date().toISOString().split('T')[0],holes:gv('rh')||'9',score:parseInt(sc.value),rating:gv('rp'),weather:gv('rweather'),with:gv('rwith'),dir:gv('rdir'),loss:gv('rloss'),notes:gv('rn')};
   var isEdit=editIdx>=0;
   if(isEdit){ rounds[editIdx]=r; } else { rounds.push(r); }
   localStorage.setItem('sm_rounds',JSON.stringify(rounds));
@@ -1043,7 +1308,45 @@ function toggleTheme(){
   document.documentElement.setAttribute('data-theme',t);
   localStorage.setItem('sm_theme',t);
 }
-function editProfile(){ localStorage.removeItem('sm_p');P=null;location.reload(); }
+function cancelEdit(){
+  var cb=document.getElementById('obCancelBtn'); if(cb) cb.style.display='none';
+  document.getElementById('onboarding').classList.remove('active');
+  document.getElementById('app').classList.add('active');
+}
+function editProfile(){
+  if(!P) return;
+  document.getElementById('app').classList.remove('active');
+  document.getElementById('onboarding').classList.add('active');
+  var cb=document.getElementById('obCancelBtn'); if(cb) cb.style.display='block';
+  // Pre-fill step 1
+  var setVal=function(id,v){var e=document.getElementById(id);if(e)e.value=v||'';};
+  setVal('name',P.name); setVal('height',P.height); setVal('sport',P.sport);
+  setVal('arms',P.arms);
+  // Pre-select radio options
+  var preRo=function(fid,val){
+    var opts=document.querySelectorAll('[onclick*="'+fid+'"]');
+    opts.forEach(function(o){
+      if(o.textContent.trim()===val){o.classList.add('sel');document.getElementById(fid).value=val;}
+    });
+  };
+  preRo('side',P.side); preRo('build',P.build);
+  // Step 2
+  setVal('exp',P.experience||P.exp); setVal('handicap',P.handicap||P.hcp);
+  setVal('scores',P.scores); setVal('freq_custom',P.frequency||P.freq);
+  preRo('license',P.license||P.lic); preRo('frequency',P.frequency||P.freq);
+  // Step 3
+  setVal('strengths',P.strengths||P.str); setVal('weaknesses',P.weaknesses||P.weak); setVal('practicing',P.practicing||P.practice);
+  // Step 4
+  setVal('clubs',P.clubs); setVal('driver',P.driver); setVal('driver_loft',P.dloft||P.driver_loft);
+  setVal('irons',P.irons); setVal('irons_range',P.irange||P.irons_range);
+  setVal('wedges',P.wedges); setVal('putter',P.putter); setVal('hybrid',P.hybrid);
+  // Step 5
+  setVal('goal_short',P.gshort||P.goal_short); setVal('goal_long',P.glong||P.goal_long);
+  preRo('platform',P.platform||P.plat);
+  // Activate step 1
+  document.querySelectorAll('.ob-step').forEach(function(s){s.classList.remove('active');});
+  document.getElementById('s1').classList.add('active');
+}
 function clearChat(){ msgs=[];localStorage.removeItem('sm_msgs');var c=document.getElementById('msgs');if(c)c.innerHTML='';var w=document.getElementById('welcomeDiv');if(w)w.style.display='block'; }
 function resetAll(){ localStorage.clear();location.reload(); }
 
@@ -1149,6 +1452,75 @@ async function doUnlock(){
     }else{ if(err){err.textContent=data.error||'Ungültiger Code.';err.style.display='block';} }
   }catch(e){ if(err){err.textContent='Verbindungsfehler.';err.style.display='block';} }
   if(btn){btn.textContent='Freischalten →';btn.disabled=false;}
+}
+
+// ── SEARCH ──
+var searchMatches=[], searchIdx=0, searchActive=false;
+
+function escRe(s){ return s.replace(/[.+?^{}()|[\]\\]/g,'\\$&'); }
+function toggleSearch(){
+  var bar=document.getElementById('searchBar');
+  if(!bar) return;
+  searchActive=!searchActive;
+  bar.style.display=searchActive?'flex':'none';
+  if(searchActive){
+    setTimeout(function(){ var inp=document.getElementById('searchInput'); if(inp) inp.focus(); },100);
+  } else {
+    closeSearch();
+  }
+}
+
+function closeSearch(){
+  searchActive=false;
+  var bar=document.getElementById('searchBar');
+  if(bar) bar.style.display='none';
+  var inp=document.getElementById('searchInput');
+  if(inp) inp.value='';
+  clearSearchHL();
+  searchMatches=[]; searchIdx=0;
+  var cnt=document.getElementById('searchCount');
+  if(cnt) cnt.textContent='';
+}
+
+function clearSearchHL(){
+  var hls=document.querySelectorAll('.search-hl');
+  hls.forEach(function(el){
+    var parent=el.parentNode;
+    parent.replaceChild(document.createTextNode(el.textContent), el);
+    parent.normalize();
+  });
+}
+
+function doSearch(query){
+  clearSearchHL();
+  searchMatches=[];
+  searchIdx=0;
+  var cnt=document.getElementById('searchCount');
+  if(!query||query.length<2){ if(cnt) cnt.textContent=''; return; }
+  var msgs=document.getElementById('msgs');
+  if(!msgs) return;
+  var bubbles=msgs.querySelectorAll('.msg');
+  var escaped=query.replace(/[.+?^{}()|[\]\\]/g,'\\$&'); var re=new RegExp('('+escaped+')','gi');
+  bubbles.forEach(function(bubble){
+    bubble.innerHTML=bubble.innerHTML.replace(re,'<span class="search-hl">$1</span>');
+    var found=bubble.querySelectorAll('.search-hl');
+    found.forEach(function(el){ searchMatches.push(el); });
+  });
+  if(cnt) cnt.textContent=searchMatches.length>0?(searchIdx+1)+'/'+searchMatches.length:'0';
+  if(searchMatches.length>0){
+    searchMatches[0].classList.add('active');
+    searchMatches[0].scrollIntoView({behavior:'smooth',block:'center'});
+  }
+}
+
+function searchNav(dir){
+  if(searchMatches.length===0) return;
+  searchMatches[searchIdx].classList.remove('active');
+  searchIdx=(searchIdx+dir+searchMatches.length)%searchMatches.length;
+  searchMatches[searchIdx].classList.add('active');
+  searchMatches[searchIdx].scrollIntoView({behavior:'smooth',block:'center'});
+  var cnt=document.getElementById('searchCount');
+  if(cnt) cnt.textContent=(searchIdx+1)+'/'+searchMatches.length;
 }
 </script>
 </body>
