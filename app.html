@@ -230,6 +230,7 @@ input:checked+.tsl::before{transform:translateX(18px);background:#080f0a}
 @keyframes fadeUp{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
 .mwrap,.typing{animation:fadeUp .22s ease both}
 .search-hl{background:rgba(250,200,0,0.35);border-radius:2px}
+@keyframes spin{to{transform:rotate(360deg)}}
 .search-hl.active{background:rgba(250,150,0,0.55)}
 </style>
 </head>
@@ -379,19 +380,22 @@ input:checked+.tsl::before{transform:translateX(18px);background:#080f0a}
   </div>
 
   <!-- SEARCH BAR -->
-  <div id="searchBar" style="display:none;padding:.6rem 1rem;background:var(--bg);border-bottom:1px solid var(--border);gap:.5rem;align-items:center">
-    <div style="flex:1;background:var(--card);border:1.5px solid var(--border2);border-radius:100px;display:flex;align-items:center;padding:.45rem .85rem;gap:.4rem">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted2)" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-      <input id="searchInput" type="text" placeholder="Im Chat suchen..." style="flex:1;background:none;border:none;outline:none;font-size:.875rem;color:var(--text);font-family:inherit" oninput="doSearch(this.value)">
+  <div id="searchBar" style="display:none;background:var(--bg);border-bottom:1px solid var(--border);flex-direction:column">
+    <div style="padding:.6rem 1rem;display:flex;gap:.5rem;align-items:center">
+      <div style="flex:1;background:var(--card);border:1.5px solid var(--border2);border-radius:100px;display:flex;align-items:center;padding:.45rem .85rem;gap:.4rem">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted2)" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input id="searchInput" type="text" placeholder="Im Chat suchen..." style="flex:1;background:none;border:none;outline:none;font-size:.875rem;color:var(--text);font-family:inherit" oninput="doSearch(this.value)">
+      </div>
+      <span id="searchCount" style="font-size:.72rem;color:var(--muted);white-space:nowrap;min-width:40px;text-align:center"></span>
+      <button onclick="searchNav(-1)" style="background:none;border:none;cursor:pointer;color:var(--muted);padding:.2rem" id="searchUp">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
+      </button>
+      <button onclick="searchNav(1)" style="background:none;border:none;cursor:pointer;color:var(--muted);padding:.2rem" id="searchDown">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <button onclick="closeSearch()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:1.1rem;padding:.1rem">×</button>
     </div>
-    <span id="searchCount" style="font-size:.72rem;color:var(--muted);white-space:nowrap;min-width:40px;text-align:center"></span>
-    <button onclick="searchNav(-1)" style="background:none;border:none;cursor:pointer;color:var(--muted);padding:.2rem" id="searchUp">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
-    </button>
-    <button onclick="searchNav(1)" style="background:none;border:none;cursor:pointer;color:var(--muted);padding:.2rem" id="searchDown">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-    </button>
-    <button onclick="closeSearch()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:1.1rem;padding:.1rem">×</button>
+    <div id="searchResults" style="display:none;max-height:280px;overflow-y:auto;border-top:1px solid var(--border)"></div>
   </div>
 
   <div class="tabs-wrap">
@@ -1476,6 +1480,8 @@ function closeSearch(){
   if(bar) bar.style.display='none';
   var inp=document.getElementById('searchInput');
   if(inp) inp.value='';
+  var res=document.getElementById('searchResults');
+  if(res) res.style.display='none';
   clearSearchHL();
   searchMatches=[]; searchIdx=0;
   var cnt=document.getElementById('searchCount');
@@ -1491,25 +1497,91 @@ function clearSearchHL(){
   });
 }
 
+function isOnWelcome(){
+  var m=document.getElementById('msgs');
+  var w=document.getElementById('welcomeDiv');
+  var msgsHidden=m&&(m.style.display==='none'||m.children.length===0);
+  var welcomeShown=w&&w.style.display!=='none';
+  return msgsHidden&&welcomeShown;
+}
 function doSearch(query){
   clearSearchHL();
   searchMatches=[];
   searchIdx=0;
   var cnt=document.getElementById('searchCount');
-  if(!query||query.length<2){ if(cnt) cnt.textContent=''; return; }
-  var msgs=document.getElementById('msgs');
-  if(!msgs) return;
-  var bubbles=msgs.querySelectorAll('.msg');
-  var escaped=query.replace(/[.+?^{}()|[\]\\]/g,'\\$&'); var re=new RegExp('('+escaped+')','gi');
-  bubbles.forEach(function(bubble){
-    bubble.innerHTML=bubble.innerHTML.replace(re,'<span class="search-hl">$1</span>');
-    var found=bubble.querySelectorAll('.search-hl');
-    found.forEach(function(el){ searchMatches.push(el); });
-  });
-  if(cnt) cnt.textContent=searchMatches.length>0?(searchIdx+1)+'/'+searchMatches.length:'0';
-  if(searchMatches.length>0){
-    searchMatches[0].classList.add('active');
-    searchMatches[0].scrollIntoView({behavior:'smooth',block:'center'});
+  var results=document.getElementById('searchResults');
+  var upBtn=document.getElementById('searchUp');
+  var dnBtn=document.getElementById('searchDown');
+  if(!query||query.length<2){
+    if(cnt) cnt.textContent='';
+    if(results) results.style.display='none';
+    return;
+  }
+  if(isOnWelcome()){
+    // GLOBAL SEARCH — Ergebnisliste
+    if(upBtn) upBtn.style.display='none';
+    if(dnBtn) dnBtn.style.display='none';
+    if(!results) return;
+    results.innerHTML='';
+    var found=[];
+    msgs.forEach(function(m,idx){
+      var clean=(m.t||'').replace(/<[^>]+>/g,'');
+      if(new RegExp(escRe(query),'i').test(clean)) found.push({idx:idx,role:m.r,text:clean,time:m.time||''});
+    });
+    if(found.length===0){
+      results.innerHTML='<div style="padding:.85rem 1rem;font-size:.8rem;color:var(--muted);text-align:center">Keine Treffer</div>';
+      results.style.display='block';
+      if(cnt) cnt.textContent='0';
+      return;
+    }
+    found.forEach(function(f){
+      var div=document.createElement('div');
+      div.style.cssText='padding:.85rem 1rem;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s';
+      div.addEventListener('mouseover',function(){this.style.background='var(--card2)';});
+      div.addEventListener('mouseout',function(){this.style.background='';});
+      var isUser=f.role==='u';
+      var roleLabel=isUser?'Du':'Coach';
+      var roleBg=isUser?'rgba(22,163,74,0.12)':'var(--card2)';
+      var rolCol=isUser?'var(--green)':'var(--muted)';
+      var hl=f.text.replace(new RegExp('('+escRe(query)+')','gi'),'<mark style="background:rgba(250,200,0,0.55);border-radius:2px;padding:0 2px;font-weight:600">$1</mark>');
+      var preview=hl.length>180?hl.slice(0,180)+'…':hl;
+      div.innerHTML=
+        '<div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.3rem">'+
+          '<span style="font-size:.65rem;font-weight:600;color:'+rolCol+';background:'+roleBg+';padding:.1rem .45rem;border-radius:100px">'+roleLabel+'</span>'+
+          '<span style="font-size:.65rem;color:var(--muted2)">'+f.time+'</span>'+
+        '</div>'+
+        '<div style="font-size:.82rem;line-height:1.5;color:var(--text)">'+preview+'</div>';
+      (function(fidx){
+        div.onclick=function(){
+          closeSearch();
+          hideWel();
+          renderMsgs();
+          setTimeout(function(){
+            var bubbles=document.getElementById('msgs').querySelectorAll('.msg');
+            var t=bubbles[fidx];
+            if(t){t.scrollIntoView({behavior:'smooth',block:'center'});t.style.transition='background .3s';t.style.background='rgba(250,200,0,0.15)';setTimeout(function(){t.style.background='';},1500);}
+          },200);
+        };
+      })(f.idx);
+      results.appendChild(div);
+    });
+    results.style.display='block';
+    if(cnt) cnt.textContent=found.length+' Treffer';
+  } else {
+    // INLINE SEARCH — highlight im Chat
+    if(upBtn) upBtn.style.display='';
+    if(dnBtn) dnBtn.style.display='';
+    if(results) results.style.display='none';
+    var container=document.getElementById('msgs');
+    if(!container) return;
+    var bubbles=container.querySelectorAll('.msg');
+    var re=new RegExp('('+escRe(query)+')','gi');
+    bubbles.forEach(function(bubble){
+      bubble.innerHTML=bubble.innerHTML.replace(re,'<span class="search-hl">$1</span>');
+      bubble.querySelectorAll('.search-hl').forEach(function(el){searchMatches.push(el);});
+    });
+    if(cnt) cnt.textContent=searchMatches.length>0?(searchIdx+1)+'/'+searchMatches.length:'0 Treffer';
+    if(searchMatches.length>0){searchMatches[0].classList.add('active');searchMatches[0].scrollIntoView({behavior:'smooth',block:'center'});}
   }
 }
 
