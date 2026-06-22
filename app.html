@@ -499,7 +499,7 @@ input:checked+.tsl::before{transform:translateX(18px);background:#080f0a}
             <div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:800">Analyse-Ergebnis</div>
             <button onclick="resetSchwung()" style="background:none;border:1px solid var(--border);border-radius:100px;padding:.3rem .8rem;font-size:.72rem;color:var(--muted);cursor:pointer;font-family:inherit">Neues Video</button>
           </div>
-          <div id="schwungResultText" style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1rem;font-size:.85rem;line-height:1.7;white-space:pre-wrap"></div>
+          <div id="schwungResultText" style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1rem;font-size:.85rem;line-height:1.7"></div>
           <button onclick="sendSchwungToCoach()" style="width:100%;margin-top:.85rem;background:var(--green);color:#080f0a;border:none;border-radius:100px;padding:.875rem;font-size:.95rem;font-weight:600;cursor:pointer;font-family:inherit">Mit Coach besprechen →</button>
         </div>
 
@@ -1314,40 +1314,87 @@ function deleteRound(idx){
 
 // ── SCHWUNG ──
 var lastSchwungAnalysis='';
+
+function extractFrames(file, count){
+  return new Promise(function(resolve){
+    var video=document.createElement('video');
+    video.preload='metadata';
+    video.muted=true;
+    video.playsInline=true;
+    var url=URL.createObjectURL(file);
+    video.src=url;
+    video.addEventListener('loadedmetadata',function(){
+      var duration=video.duration;
+      var frames=[];
+      var times=[];
+      for(var i=0;i<count;i++) times.push(duration*(i+1)/(count+1));
+      var idx=0;
+      function seekNext(){
+        if(idx>=times.length){ URL.revokeObjectURL(url); resolve(frames); return; }
+        video.currentTime=times[idx];
+      }
+      video.addEventListener('seeked',function(){
+        var canvas=document.createElement('canvas');
+        var scale=Math.min(1,640/video.videoWidth);
+        canvas.width=Math.round(video.videoWidth*scale);
+        canvas.height=Math.round(video.videoHeight*scale);
+        canvas.getContext('2d').drawImage(video,0,0,canvas.width,canvas.height);
+        frames.push(canvas.toDataURL('image/jpeg',0.8).split(',')[1]);
+        idx++;
+        seekNext();
+      });
+      seekNext();
+    });
+    video.addEventListener('error',function(){ resolve([]); });
+    video.load();
+  });
+}
+
 function onSchwVid(inp){
   if(!inp.files[0]) return;
   var file=inp.files[0];
-  if(file.size>25*1024*1024){ alert('Video zu groß (max. 25 MB). Bitte kürzer aufnehmen.'); inp.value=''; return; }
+  if(file.size>100*1024*1024){ alert('Video zu groß (max. 100 MB).'); inp.value=''; return; }
   document.getElementById('schwungUpload').style.display='none';
   document.getElementById('schwungLoading').style.display='flex';
   document.getElementById('schwungResult').style.display='none';
-  var reader=new FileReader();
-  reader.onload=function(e){
-    var base64=e.target.result.split(',')[1];
-    var mime=file.type||'video/mp4';
+
+  extractFrames(file, 4).then(function(frames){
+    if(!frames||frames.length===0){
+      document.getElementById('schwungLoading').style.display='none';
+      document.getElementById('schwungUpload').style.display='block';
+      alert('Video konnte nicht gelesen werden. Bitte anderes Format versuchen.');
+      inp.value=''; return;
+    }
     fetch(W,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({mode:'video',videoBase64:base64,mimeType:mime,profile:P})
+      body:JSON.stringify({mode:'video',frames:frames,profile:P})
     })
     .then(function(r){return r.json();})
     .then(function(data){
-      var result=data.result||'Analyse konnte nicht abgeschlossen werden.';
+      var result=data.result||data.error||'Analyse fehlgeschlagen.';
       lastSchwungAnalysis=result;
       document.getElementById('schwungLoading').style.display='none';
       document.getElementById('schwungResult').style.display='block';
-      document.getElementById('schwungResultText').textContent=result;
+      // Render markdown to HTML
+      var html2=result
+        .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+        .replace(/^#{1,3}\s+(.+)$/gm,'<div style="font-weight:700;margin-top:.85rem;margin-bottom:.25rem;color:var(--text)">$1</div>')
+        .replace(/^---+$/gm,'<hr style="border:none;border-top:1px solid var(--border);margin:.5rem 0">')
+        .replace(/
+/g,'<br>');
+      document.getElementById('schwungResultText').innerHTML=html2;
       inp.value='';
     })
     .catch(function(err){
       document.getElementById('schwungLoading').style.display='none';
       document.getElementById('schwungUpload').style.display='block';
-      alert('Fehler bei der Analyse: '+err.message);
+      alert('Verbindungsfehler: '+err.message);
       inp.value='';
     });
-  };
-  reader.readAsDataURL(file);
+  });
 }
+
 function resetSchwung(){
   document.getElementById('schwungResult').style.display='none';
   document.getElementById('schwungUpload').style.display='block';
@@ -1430,7 +1477,7 @@ function pickTheme(t){
 let recognition=null;let micActive=false;
 function toggleMic(){
   if(!('webkitSpeechRecognition' in window)&&!('SpeechRecognition' in window)){
-    alert('Spracherkennung wird in diesem Browser nicht unterstützt. Bitte Chrome verwenden.');return;
+    alert('Spracherkennung nicht verfügbar. Bitte Safari oder Chrome verwenden.');return;
   }
   if(micActive){stopMic();return;}
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
@@ -1438,34 +1485,40 @@ function toggleMic(){
   recognition.lang='de-DE';
   recognition.continuous=false;
   recognition.interimResults=true;
-  recognition.onstart=()=>{
+  recognition.onstart=function(){
     micActive=true;
-    document.getElementById('micBtn').style.background='var(--green)';
-    document.getElementById('micBtn').style.color='#080f0a';
-    document.getElementById('chatIn').placeholder='Spreche jetzt...';
+    var btn=document.getElementById('micBtn');
+    if(btn){btn.style.background='var(--green)';btn.style.color='#080f0a';}
+    var ta=document.getElementById('chatIn');
+    if(ta) ta.placeholder='Spreche jetzt...';
   };
-  recognition.onresult=(e)=>{
-    const transcript=Array.from(e.results).map(r=>r[0].transcript).join('');
-    document.getElementById('chatIn').value=transcript;
-    resize(document.getElementById('chatIn'));
+  recognition.onresult=function(e){
+    var transcript=Array.from(e.results).map(function(r){return r[0].transcript;}).join('');
+    var ta=document.getElementById('chatIn');
+    if(ta){ta.value=transcript;rsz(ta);}
   };
-  recognition.onend=()=>{
+  recognition.onend=function(){
     micActive=false;
-    document.getElementById('micBtn').style.background='';
-    document.getElementById('micBtn').style.color='';
-    document.getElementById('chatIn').placeholder='Schreib deinem Coach...';
-    const txt=document.getElementById('chatIn').value.trim();
+    var btn=document.getElementById('micBtn');
+    if(btn){btn.style.background='';btn.style.color='';}
+    var ta=document.getElementById('chatIn');
+    if(ta) ta.placeholder='Schreib deinem Coach...';
+    var txt=ta?ta.value.trim():'';
     if(txt) setTimeout(send,300);
   };
-  recognition.onerror=()=>{stopMic();};
-  recognition.start();
+  recognition.onerror=function(e){
+    stopMic();
+    if(e.error==='not-allowed') alert('Mikrofon-Zugriff verweigert. Bitte in den Einstellungen erlauben.');
+  };
+  try{ recognition.start(); }catch(e){ stopMic(); }
 }
 function stopMic(){
-  if(recognition){recognition.stop();recognition=null;}
+  if(recognition){try{recognition.stop();}catch(e){} recognition=null;}
   micActive=false;
-  document.getElementById('micBtn').style.background='';
-  document.getElementById('micBtn').style.color='';
-  document.getElementById('chatIn').placeholder='Schreib deinem Coach...';
+  var btn=document.getElementById('micBtn');
+  if(btn){btn.style.background='';btn.style.color='';}
+  var ta=document.getElementById('chatIn');
+  if(ta) ta.placeholder='Schreib deinem Coach...';
 }
 
 // ── AVATAR ──
