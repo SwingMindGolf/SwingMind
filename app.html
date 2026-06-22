@@ -898,7 +898,7 @@ function showLim(){
   var c=document.getElementById('msgs'); if(c) c.appendChild(e);
   scrollB();
 }
-function onVid(inp){ if(!prem){openPM();inp.value='';return;} if(inp.files[0]){pendVid=inp.files[0]; var ta=document.getElementById('chatIn'); if(ta) ta.placeholder='Video: '+pendVid.name;} }
+function onVid(inp){ inp.value=''; goTab('schwung'); }
 function renderHints(subPrompts){
   var row=document.getElementById('hints'); if(!row) return; row.innerHTML='';
   // Menü always first
