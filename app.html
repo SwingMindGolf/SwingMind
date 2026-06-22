@@ -59,7 +59,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.55rem}
 .opts{display:grid;grid-template-columns:1fr 1fr;gap:.45rem}
 .opts.t{grid-template-columns:1fr 1fr 1fr}
-.opt{border:1.5px solid var(--bdr2);border-radius:10px;padding:.68rem .5rem;cursor:pointer;text-align:center;font-size:.82rem;color:var(--t2);background:var(--card);transition:all .18s;font-weight:400}
+.opt{border:1.5px solid var(--bdr2);border-radius:10px;padding:.68rem .5rem;cursor:pointer;text-align:center;font-size:.82rem;color:var(--t2);background:var(--card);transition:all .18s;font-weight:400;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none}
 .opt.on{border-color:var(--green);background:var(--gdim);color:var(--green);font-weight:600}
 .opt:active{transform:scale(.96)}
 .sdiv{font-size:.68rem;font-weight:600;color:var(--green);letter-spacing:.08em;text-transform:uppercase;margin:1.1rem 0 .55rem;padding-bottom:.35rem;border-bottom:1px solid var(--bdr)}
@@ -1379,10 +1379,9 @@ function onSchwVid(inp){
       // Render markdown to HTML
       var html2=result
         .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
-        .replace(/^#{1,3}\s+(.+)$/gm,'<div style="font-weight:700;margin-top:.85rem;margin-bottom:.25rem;color:var(--text)">$1</div>')
-        .replace(/^---+$/gm,'<hr style="border:none;border-top:1px solid var(--border);margin:.5rem 0">')
-        .replace(/
-/g,'<br>');
+        .replace(/^#{1,3}\s+(.+)$/gm,'<div style="font-weight:700;margin:.6rem 0 .2rem">$1</div>')
+        .replace(/^---+$/gm,'')
+        .split('\n').join('<br>');
       document.getElementById('schwungResultText').innerHTML=html2;
       inp.value='';
     })
