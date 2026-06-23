@@ -702,7 +702,7 @@ const CATS=[
    prompts:['Nervosität & Druck','Nach schlechter Runde','Handicap-Roadmap','Saisonplanung']},
 ];
 
-let P=null,msgs=[],rounds=[],prem=false,loading=false,pendVid=null;
+let P=null,msgs=[],rounds=[],prem=false,loading=false,pendVid=null,currentCat=null;
 let holeFilter='all', countFilter=10;
 
 // ── INIT ──
@@ -811,6 +811,9 @@ function goCoach(){
   }
 }
 function showWelcome(){
+  save(); // save current category chat
+  currentCat=null;
+  msgs=loadCatMsgs(null);
   lastCoachState='welcome';
   goTab('coach');
   var w=document.getElementById('welcomeDiv');
@@ -843,9 +846,18 @@ function buildCats(){
   });
 }
 function selCat(c){
+  // Save current chat before switching
+  saveMsgs();
+  // Load this category's msgs
+  currentCat=c.id;
+  msgs=loadCatMsgs(c.id);
   hideWel();
-  var txt=c.i+' *'+c.n+'* — was möchtest du heute machen?\n\n'+c.prompts.map(function(p,i){return (i+1)+'. '+p;}).join('\n');
-  addAI(txt);
+  renderMsgs();
+  // Show welcome message if first time in this category
+  if(msgs.length===0){
+    var txt=c.i+' *'+c.n+'* — was möchtest du heute machen?\n\n'+c.prompts.map(function(p,i){return (i+1)+'. '+p;}).join('\n');
+    addAI(txt);
+  }
   renderHints(c.prompts.map(function(p,i){ return (i+1)+'. '+p; }));
 }
 
@@ -879,7 +891,14 @@ function addAI(t){
   var c=document.getElementById('msgs'); if(c) c.appendChild(mkMsg('a',t,time));
   scrollB();
 }
-function saveMsgs(){ localStorage.setItem('sm_msgs',JSON.stringify(msgs.slice(-120))); }
+function saveMsgs(){
+  var key=currentCat?'sm_msgs_'+currentCat:'sm_msgs';
+  localStorage.setItem(key,JSON.stringify(msgs.slice(-120)));
+}
+function loadCatMsgs(catId){
+  var key=catId?'sm_msgs_'+catId:'sm_msgs';
+  return JSON.parse(localStorage.getItem(key)||'[]');
+}
 function showTyp(){ var c=document.getElementById('msgs'); if(!c) return; var e=document.createElement('div'); e.className='typing'; e.id='typ'; e.innerHTML='<div class="td"></div><div class="td"></div><div class="td"></div>'; c.appendChild(e); scrollB(); }
 function hideTyp(){ var e=document.getElementById('typ'); if(e) e.remove(); }
 function hideWel(){
@@ -1478,7 +1497,7 @@ function editProfile(){
   document.querySelectorAll('.ob-step').forEach(function(s){s.classList.remove('active');});
   document.getElementById('s1').classList.add('active');
 }
-function clearChat(){ msgs=[];localStorage.removeItem('sm_msgs');var c=document.getElementById('msgs');if(c)c.innerHTML='';var w=document.getElementById('welcomeDiv');if(w)w.style.display='block'; }
+function clearChat(){ msgs=[];var ck=currentCat?'sm_msgs_'+currentCat:'sm_msgs';localStorage.removeItem(ck);var c=document.getElementById('msgs');if(c)c.innerHTML='';var w=document.getElementById('welcomeDiv');if(w)w.style.display='block'; }
 function resetAll(){ localStorage.clear();location.reload(); }
 
 // ── THEME PICKER ──
