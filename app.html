@@ -572,7 +572,7 @@ input:checked+.tsl::before{transform:translateX(18px);background:#080f0a}
   </div>
 
   <div class="bnav">
-    <div class="bn on" id="bn-coach" onclick="showWelcome()">
+    <div class="bn on" id="bn-coach" onclick="goCoach()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
       <span>Coach</span>
     </div>
@@ -796,7 +796,22 @@ function updHdr(){
 }
 
 // ── TABS ──
+var lastCoachState = 'welcome';
+function goCoach(){
+  goTab('coach');
+  var m=document.getElementById('msgs');
+  var hasChat=m&&m.children.length>0;
+  if(lastCoachState==='chat'&&hasChat){
+    // Return to chat
+    var w=document.getElementById('welcomeDiv');
+    if(w) w.style.display='none';
+    if(m) m.style.display='block';
+  } else {
+    showWelcome();
+  }
+}
 function showWelcome(){
+  lastCoachState='welcome';
   goTab('coach');
   var w=document.getElementById('welcomeDiv');
   var m=document.getElementById('msgs');
@@ -870,6 +885,7 @@ function hideTyp(){ var e=document.getElementById('typ'); if(e) e.remove(); }
 function hideWel(){
   var w=document.getElementById('welcomeDiv'); if(w) w.style.display='none';
   var m=document.getElementById('msgs'); if(m) m.style.display='block';
+  lastCoachState='chat';
 }
 function scrollB(){ setTimeout(function(){ var s=document.getElementById('chatScroll'); if(s) s.scrollTop=99999; },60); }
 function fmtT(d){ return d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}); }
@@ -1400,7 +1416,6 @@ function onSchwVid(inp){
 
 function resetSchwung(){
   document.getElementById('schwungResult').style.display='none';
-  document.getElementById('schwungUpload').style.display='block';
   document.getElementById('schwVid').value='';
   lastSchwungAnalysis='';
 }
@@ -1578,6 +1593,31 @@ async function doUnlock(){
 
 // ── SEARCH ──
 var searchMatches=[], searchIdx=0, searchActive=false;
+
+// ── SWIPE GESTURE ──
+(function(){
+  var startX=0, startY=0;
+  document.addEventListener('touchstart',function(e){
+    startX=e.touches[0].clientX;
+    startY=e.touches[0].clientY;
+  },{passive:true});
+  document.addEventListener('touchend',function(e){
+    var dx=e.changedTouches[0].clientX-startX;
+    var dy=Math.abs(e.changedTouches[0].clientY-startY);
+    // Swipe right from left edge (within 60px) with horizontal movement >80px
+    if(dx>80&&dy<50&&startX<60){
+      var activeTab=document.querySelector('.tab.active');
+      var coachTab=document.getElementById('tab-coach');
+      if(activeTab&&activeTab===coachTab){
+        // In coach tab: go to welcome
+        showWelcome();
+      } else {
+        // In other tabs: go to coach
+        goCoach();
+      }
+    }
+  },{passive:true});
+})();
 
 function escRe(s){ return s.replace(/[.+?^{}()|[\]\\]/g,'\\$&'); }
 function toggleSearch(){
