@@ -811,7 +811,7 @@ function goCoach(){
   }
 }
 function showWelcome(){
-  save(); // save current category chat
+  saveMsgs();
   currentCat=null;
   msgs=loadCatMsgs(null);
   lastCoachState='welcome';
