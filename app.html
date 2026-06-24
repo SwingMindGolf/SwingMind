@@ -704,7 +704,7 @@ const CATS=[
    prompts:['Nervosität & Druck','Nach schlechter Runde','Handicap-Roadmap','Saisonplanung']},
 ];
 
-let P=null,msgs=[],rounds=[],prem=false,loading=false,pendVid=null,currentCat=null;
+let P=null,msgs=[],rounds=[],prem=false,loading=false,pendVid=null,currentCat=null,currentCatPrompts=[];
 let holeFilter='all', countFilter=10;
 
 // ── INIT ──
@@ -848,19 +848,17 @@ function buildCats(){
   });
 }
 function selCat(c){
-  // Save current chat before switching
   saveMsgs();
-  // Load this category's msgs
   currentCat=c.id;
+  currentCatPrompts=c.prompts.map(function(p,i){ return (i+1)+'. '+p; });
   msgs=loadCatMsgs(c.id);
   hideWel();
   renderMsgs();
-  // Show welcome message if first time in this category
   if(msgs.length===0){
     var txt=c.i+' *'+c.n+'* — was möchtest du heute machen?\n\n'+c.prompts.map(function(p,i){return (i+1)+'. '+p;}).join('\n');
     addAI(txt);
   }
-  renderHints(c.prompts.map(function(p,i){ return (i+1)+'. '+p; }));
+  renderHints(currentCatPrompts);
 }
 
 // ── MESSAGES ──
@@ -928,6 +926,10 @@ function loadCatMsgs(catId){
 }
 function showTyp(){ var c=document.getElementById('msgs'); if(!c) return; var e=document.createElement('div'); e.className='typing'; e.id='typ'; e.innerHTML='<div class="td"></div><div class="td"></div><div class="td"></div>'; c.appendChild(e); scrollB(); }
 function hideTyp(){ var e=document.getElementById('typ'); if(e) e.remove(); }
+function restoreHints(){
+  if(currentCatPrompts&&currentCatPrompts.length) renderHints(currentCatPrompts);
+  else renderHints();
+}
 function hideWel(){
   var w=document.getElementById('welcomeDiv'); if(w) w.style.display='none';
   var m=document.getElementById('msgs'); if(m) m.style.display='block';
@@ -988,15 +990,20 @@ function showLim(){
   scrollB();
 }
 function onVid(inp){ inp.value=''; goTab('schwung'); }
+var SCHWUNG_KEYWORDS=['schwung','video','analyse','aufnehm','film'];
+function isSchwungChip(txt){
+  var low=txt.toLowerCase();
+  return SCHWUNG_KEYWORDS.some(function(k){return low.indexOf(k)>=0;});
+}
 function renderHints(subPrompts){
   var row=document.getElementById('hints'); if(!row) return; row.innerHTML='';
-  // Menü always first
   var all=subPrompts&&subPrompts.length?subPrompts:['Runde auswerten','Trainingsplan','Schläger-Tipp'];
   var chips=['Menü'].concat(all);
   chips.forEach(function(h){
     var c=document.createElement('div'); c.className='hchip'; c.textContent=h;
     c.onclick=(function(hint){ return function(){
       if(hint==='Menü'){showWelcome();return;}
+      if(isSchwungChip(hint)){goTab('schwung');return;}
       var ta=document.getElementById('chatIn'); if(ta) ta.value=hint; send();
     }; })(h);
     row.appendChild(c);
