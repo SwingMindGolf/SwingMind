@@ -956,7 +956,7 @@ async function send(){
   if(!prem) incMC();
   loading=true;
   var sb=document.getElementById('sendB'); if(sb) sb.disabled=true;
-  showTyp(); renderHints();
+  showTyp(); restoreHints();
   try{
     var apiMsgs=msgs.slice(-24).map(function(m){return{role:m.r==='u'?'user':'assistant',content:m.t};});
     var res=await fetch(W,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:sysP(),messages:apiMsgs})});
