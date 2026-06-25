@@ -4,7 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#080f0a">
+<link rel="manifest" href="/manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="SwingMind">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+  <meta name="theme-color" content="#080f0a">
 <title>SwingMind</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -974,6 +979,32 @@ async function send(){
   var sb2=document.getElementById('sendB'); if(sb2) sb2.disabled=false;
   pendVid=null;
 }
+function sendText(txt){
+  if(!txt||loading) return;
+  if(!canSend()){ showLim(); return; }
+  var inp=document.getElementById('chatIn');
+  if(inp){ inp.value=''; rsz(inp); }
+  addUser(txt);
+  if(!prem) incMC();
+  loading=true;
+  var sb=document.getElementById('sendB'); if(sb) sb.disabled=true;
+  showTyp(); restoreHints();
+  var apiMsgs=msgs.slice(-24).map(function(m){return{role:m.r==='u'?'user':'assistant',content:m.t};});
+  fetch(W,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:sysP(),messages:apiMsgs})})
+  .then(function(r){return r.json();})
+  .then(function(data){
+    hideTyp();
+    var full=data.content&&data.content[0]?data.content[0].text:'Verbindungsfehler.';
+    addAI(full); loading=false; restoreHints();
+    var sb2=document.getElementById('sendB'); if(sb2) sb2.disabled=false;
+  })
+  .catch(function(){
+    hideTyp();
+    addAI('Verbindungsfehler. Bitte nochmal versuchen.');
+    loading=false;
+    var sb3=document.getElementById('sendB'); if(sb3) sb3.disabled=false;
+  });
+}
 async function sendWelcome(){
   loading=true; showTyp();
   try{
@@ -1004,7 +1035,7 @@ function renderHints(subPrompts){
     c.onclick=(function(hint){ return function(){
       if(hint==='Menü'){showWelcome();return;}
       if(isSchwungChip(hint)){goTab('schwung');return;}
-      var ta=document.getElementById('chatIn'); if(ta) ta.value=hint; send();
+      sendText(hint);
     }; })(h);
     row.appendChild(c);
   });
@@ -1804,6 +1835,13 @@ function searchNav(dir){
   searchMatches[searchIdx].scrollIntoView({behavior:'smooth',block:'center'});
   var cnt=document.getElementById('searchCount');
   if(cnt) cnt.textContent=(searchIdx+1)+'/'+searchMatches.length;
+}
+</script>
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('/sw.js').catch(function(){});
+  });
 }
 </script>
 </body>
