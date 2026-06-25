@@ -1541,7 +1541,7 @@ function editProfile(){
   var preRo=function(fid,val){
     var opts=document.querySelectorAll('[onclick*="'+fid+'"]');
     opts.forEach(function(o){
-      if(o.textContent.trim()===val){o.classList.add('sel');document.getElementById(fid).value=val;}
+      if(o.textContent.trim()===val){o.classList.add('on');document.getElementById(fid).value=val;}
     });
   };
   preRo('side',P.side); preRo('build',P.build);
@@ -1689,7 +1689,7 @@ var searchMatches=[], searchIdx=0, searchActive=false;
     var dx=e.changedTouches[0].clientX-startX;
     var dy=Math.abs(e.changedTouches[0].clientY-startY);
     // Swipe right from left edge (within 60px) with horizontal movement >80px
-    if(dx>80&&dy<50&&startX<60){
+    if(dx>70&&dy<60&&startX<120){
       var activeTab=document.querySelector('.tab.active');
       var coachTab=document.getElementById('tab-coach');
       if(activeTab&&activeTab===coachTab){
