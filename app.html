@@ -375,7 +375,10 @@ input:checked+.tsl::before{transform:translateX(18px);background:#080f0a}
 <!-- ═══════════ APP ═══════════ -->
 <div id="app">
   <div class="hdr">
-    <div class="hdr-logo" onclick="showWelcome()" style="cursor:pointer"><span>Swing</span>Mind</div>
+    <div style="display:flex;align-items:center;gap:.5rem">
+      <button id="backBtn" onclick="showWelcome()" style="display:none;background:none;border:none;cursor:pointer;color:var(--muted);padding:.2rem .4rem .2rem 0;font-size:1.2rem;line-height:1">‹</button>
+      <div class="hdr-logo" onclick="showWelcome()" style="cursor:pointer"><span>Swing</span>Mind</div>
+    </div>
     <div class="hdr-r">
       <span class="ppill" id="ppill" onclick="openPM()" style="cursor:pointer">PREMIUM</span>
       <span class="mlim" id="mlim" onclick="openPM()" style="cursor:pointer">10 heute</span>
@@ -822,6 +825,7 @@ function showWelcome(){
   currentCat=null;
   msgs=loadCatMsgs(null);
   lastCoachState='welcome';
+  var bb=document.getElementById('backBtn'); if(bb) bb.style.display='none';
   goTab('coach');
   var w=document.getElementById('welcomeDiv');
   var m=document.getElementById('msgs');
@@ -939,6 +943,7 @@ function hideWel(){
   var w=document.getElementById('welcomeDiv'); if(w) w.style.display='none';
   var m=document.getElementById('msgs'); if(m) m.style.display='block';
   lastCoachState='chat';
+  var bb=document.getElementById('backBtn'); if(bb) bb.style.display='block';
 }
 function scrollB(){ setTimeout(function(){ var s=document.getElementById('chatScroll'); if(s) s.scrollTop=99999; },60); }
 function fmtT(d){ return d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}); }
