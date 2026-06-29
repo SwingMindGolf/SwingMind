@@ -1525,13 +1525,13 @@ function toggleTheme(){
 }
 function cancelEdit(){
   var cb=document.getElementById('obCancelBtn'); if(cb) cb.style.display='none';
-  document.getElementById('onboarding').classList.remove('active');
-  document.getElementById('app').classList.add('active');
+  document.getElementById('onboarding').classList.remove('on');
+  document.getElementById('app').classList.add('on');
 }
 function editProfile(){
   if(!P) return;
-  document.getElementById('app').classList.remove('active');
-  document.getElementById('onboarding').classList.add('active');
+  document.getElementById('app').classList.remove('on');
+  document.getElementById('onboarding').classList.add('on');
   var cb=document.getElementById('obCancelBtn'); if(cb) cb.style.display='block';
   // Pre-fill step 1
   var setVal=function(id,v){var e=document.getElementById(id);if(e)e.value=v||'';};
@@ -1690,13 +1690,13 @@ var searchMatches=[], searchIdx=0, searchActive=false;
     var dy=Math.abs(e.changedTouches[0].clientY-startY);
     // Swipe right from left edge (within 60px) with horizontal movement >80px
     if(dx>70&&dy<60&&startX<120){
-      var activeTab=document.querySelector('.tab.active');
-      var coachTab=document.getElementById('tab-coach');
+      var activeTab=document.querySelector('.tab.on');
+      var coachTab=document.getElementById('tab-coach'); var chatMsgs=document.getElementById('msgs');
       if(activeTab&&activeTab===coachTab){
-        // In coach tab: go to welcome
-        showWelcome();
+        if(chatMsgs&&chatMsgs.style.display!=='none'&&chatMsgs.children.length>0){
+          showWelcome();
+        }
       } else {
-        // In other tabs: go to coach
         goCoach();
       }
     }
