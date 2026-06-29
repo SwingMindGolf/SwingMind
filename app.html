@@ -1503,6 +1503,27 @@ function onSchwVid(inp){
   });
 }
 
+var lastFrames = [];
+function loadDetailedAnalysis(){
+  if(!lastFrames.length){ alert('Lade zuerst ein neues Video hoch.'); return; }
+  var btn=document.getElementById('detailBtn');
+  if(btn){ btn.textContent='Lädt...'; btn.disabled=true; }
+  fetch(W,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({mode:'video',frames:lastFrames,profile:P,detailed:true})
+  })
+  .then(function(r){return r.json();})
+  .then(function(data){
+    var result=data.result||'Keine Analyse erhalten.';
+    lastSchwungAnalysis=result;
+    document.getElementById('schwungResultText').textContent=result;
+    if(btn){ btn.textContent='✓ Detaillierte Analyse geladen'; btn.disabled=true; }
+  })
+  .catch(function(){
+    if(btn){ btn.textContent='🔍 Detaillierte Analyse laden'; btn.disabled=false; }
+  });
+}
 function resetSchwung(){
   document.getElementById('schwungResult').style.display='none';
   document.getElementById('schwVid').value='';
