@@ -1632,10 +1632,15 @@ function editProfile(){
   setVal('name',P.name); setVal('height',P.height); setVal('sport',P.sport);
   setVal('arms',P.arms);
   var preRo=function(fid,val){
-    var opts=document.querySelectorAll('[onclick*="'+fid+'"]');
+    if(!val) return;
+    var opts=document.querySelectorAll('.opt');
     opts.forEach(function(o){
+      var oc=o.getAttribute('onclick')||'';
+      if(oc.indexOf("pick(this,'"+fid+"'")!==0) return;
       o.classList.remove('on');
-      if(o.textContent.trim()===val){o.classList.add('on');var f=document.getElementById(fid);if(f)f.value=val;}
+      var m=oc.match(/pick\(this,'[^']+','([^']*)'\)/);
+      var optVal=m?m[1]:'';
+      if(optVal===val){o.classList.add('on');var f=document.getElementById(fid);if(f)f.value=val;}
     });
   };
   preRo('side',P.side); preRo('build',P.build);
