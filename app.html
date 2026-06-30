@@ -380,8 +380,8 @@ input:checked+.tsl::before{transform:translateX(18px);background:#080f0a}
       <div class="hdr-logo" onclick="showWelcome()" style="cursor:pointer"><span>Swing</span>Mind</div>
     </div>
     <div class="hdr-r">
-      <span class="ppill" id="ppill" onclick="openPM()" style="cursor:pointer">✓ PREMIUM</span>
-      <span class="mlim" id="mlim" onclick="openPM()" style="cursor:pointer">10 heute</span>
+      <span class="ppill on" id="ppill" onclick="openPM()" style="cursor:pointer">PREMIUM</span>
+      <span class="mlim" id="mlim" onclick="openPM()" style="cursor:pointer;display:none">10 heute</span>
       <button id="searchBtn" onclick="toggleSearch()" style="background:none;border:none;cursor:pointer;color:var(--muted);padding:.2rem;display:flex;align-items:center" title="Suchen">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
       </button>
@@ -806,8 +806,8 @@ function updHdr(){
   var av=document.getElementById('avBtn'); if(av) av.textContent=init;
   var wg=document.getElementById('wgreet'); if(wg) wg.textContent='Hey '+(P.name||'Golfer').split(' ')[0]+'!';
   var cnt=getMC();
-  var ml=document.getElementById('mlim'); if(ml) ml.textContent=prem?'∞':(FREE-cnt)+' heute';
-  var pp=document.getElementById('ppill'); if(pp) pp.classList.toggle('on',prem);
+  var ml=document.getElementById('mlim'); if(ml) ml.textContent=(FREE-cnt)+' heute';
+  var pp=document.getElementById('ppill'); if(pp) pp.textContent=prem?'✓ PREMIUM':'PREMIUM ⭐';
   var bss=document.getElementById('bnSchwungStar'); if(bss) bss.style.display=prem?'none':'block';
   if(prem && ml) ml.style.display='none';
 }
