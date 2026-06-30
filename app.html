@@ -1429,6 +1429,14 @@ function deleteRound(idx){
 // ── SCHWUNG ──
 var lastSchwungAnalysis='';
 
+function setSchwungStatus(text, progress, hint){
+  var s=document.getElementById('schwungStatus');
+  var p=document.getElementById('schwungProgress');
+  var h=document.getElementById('schwungHint');
+  if(s) s.textContent=text;
+  if(p) p.style.width=progress+'%';
+  if(h&&hint) h.textContent=hint;
+}
 function extractFramesWithProgress(file, count){
   var lastProgress=10;
   var progressTimer=setInterval(function(){
