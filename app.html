@@ -687,7 +687,7 @@ input:checked+.tsl::before{transform:translateX(18px);background:#080f0a}
 <script>
 // ══════════════════════════════════
 // DEV MODE — vor Live-Gang auf false!
-const DEV = true;
+const DEV = false;
 const DEV_P = {
   name:'Etienne Knöll',side:'Linkshänder',height:'182 cm',arms:'Lang',build:'Athletisch',
   sport:'Fußball 26 Jahre, Fitness',experience:'1–2 Jahre',license:'In Vorbereitung',
@@ -765,7 +765,6 @@ function nx(s){
   if(s===1) ok=req('fn','name')&req('fsi','side')&req('fhe','height')&req('far','arms')&req('fbu','build');
   if(s===2) ok=req('fex','exp')&req('fli','license')&req('fhc','handicap')&req('fsc','scores')&req('ffr','freq');
   if(s===3) ok=req('fst','strengths')&req('fwk','weaknesses')&req('fpr','practicing');
-  console.log('nx('+s+') ok='+ok, 'values:', {name:gv('name'),side:gv('side'),height:gv('height'),arms:gv('arms'),build:gv('build'),exp:gv('exp'),license:gv('license'),handicap:gv('handicap'),scores:gv('scores'),freq:gv('freq'),strengths:gv('strengths'),weaknesses:gv('weaknesses'),practicing:gv('practicing')});
   if(!ok){ var fe=document.querySelector('.f.err'); if(fe) fe.scrollIntoView({behavior:'smooth',block:'center'}); return; }
   var cur=document.getElementById('s'+s); if(cur) cur.classList.remove('on');
   var nxt=document.getElementById('s'+(s+1)); if(nxt) nxt.classList.add('on');
@@ -777,9 +776,7 @@ function bk(s){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function finish(){
-  console.log('finish() called', {gshort:gv('gshort'),glong:gv('glong'),platform:gv('platform')});
   if(!req('fgs','gshort')||!req('fgl','glong')||!req('fpl','platform')){
-    console.log('finish() blocked by validation');
     var fe=document.querySelector('.f.err'); if(fe) fe.scrollIntoView({behavior:'smooth',block:'center'}); return;
   }
   P={
@@ -791,9 +788,7 @@ function finish(){
     wedges:gv('wedges'),putter:gv('putter'),hybrid:gv('hybrid'),
     gshort:gv('gshort'),glong:gv('glong'),platform:gv('platform')
   };
-  console.log('finish() saving P:', P);
   localStorage.setItem('sm_p',JSON.stringify(P));
-  console.log('finish() saved to localStorage, verify:', localStorage.getItem('sm_p'));
   showApp();
   setTimeout(sendWelcome,600);
 }
