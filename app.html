@@ -1628,34 +1628,28 @@ function editProfile(){
   document.getElementById('app').classList.remove('on');
   document.getElementById('onboarding').classList.add('on');
   var cb=document.getElementById('obCancelBtn'); if(cb) cb.style.display='block';
-  // Pre-fill step 1
   var setVal=function(id,v){var e=document.getElementById(id);if(e)e.value=v||'';};
   setVal('name',P.name); setVal('height',P.height); setVal('sport',P.sport);
   setVal('arms',P.arms);
-  // Pre-select radio options
   var preRo=function(fid,val){
     var opts=document.querySelectorAll('[onclick*="'+fid+'"]');
     opts.forEach(function(o){
-      if(o.textContent.trim()===val){o.classList.add('on');document.getElementById(fid).value=val;}
+      o.classList.remove('on');
+      if(o.textContent.trim()===val){o.classList.add('on');var f=document.getElementById(fid);if(f)f.value=val;}
     });
   };
   preRo('side',P.side); preRo('build',P.build);
-  // Step 2
-  setVal('exp',P.experience||P.exp); setVal('handicap',P.handicap||P.hcp);
-  setVal('scores',P.scores); setVal('freq_custom',P.frequency||P.freq);
-  preRo('license',P.license||P.lic); preRo('frequency',P.frequency||P.freq);
-  // Step 3
-  setVal('strengths',P.strengths||P.str); setVal('weaknesses',P.weaknesses||P.weak); setVal('practicing',P.practicing||P.practice);
-  // Step 4
-  setVal('clubs',P.clubs); setVal('driver',P.driver); setVal('driver_loft',P.dloft||P.driver_loft);
-  setVal('irons',P.irons); setVal('irons_range',P.irange||P.irons_range);
+  setVal('exp',P.experience); setVal('handicap',P.handicap);
+  setVal('scores',P.scores);
+  preRo('license',P.license); preRo('freq',P.freq);
+  setVal('strengths',P.strengths); setVal('weaknesses',P.weaknesses); setVal('practicing',P.practicing);
+  setVal('clubs',P.clubs); setVal('driver',P.driver); setVal('dloft',P.dloft); setVal('dshaft',P.dshaft); setVal('dshaftw',P.dshaftw);
+  setVal('irons',P.irons); setVal('irange',P.irange); setVal('ishaft',P.ishaft); setVal('ishaftw',P.ishaftw);
   setVal('wedges',P.wedges); setVal('putter',P.putter); setVal('hybrid',P.hybrid);
-  // Step 5
-  setVal('goal_short',P.gshort||P.goal_short); setVal('goal_long',P.glong||P.goal_long);
-  preRo('platform',P.platform||P.plat);
-  // Activate step 1
-  document.querySelectorAll('.ob-step').forEach(function(s){s.classList.remove('active');});
-  document.getElementById('s1').classList.add('active');
+  setVal('gshort',P.gshort); setVal('glong',P.glong);
+  preRo('platform',P.platform);
+  document.querySelectorAll('.ob-step').forEach(function(s){s.classList.remove('on');});
+  var s1=document.getElementById('s1'); if(s1) s1.classList.add('on');
 }
 function clearChat(){ msgs=[];var ck=currentCat?'sm_msgs_'+currentCat:'sm_msgs';localStorage.removeItem(ck);var c=document.getElementById('msgs');if(c)c.innerHTML='';var w=document.getElementById('welcomeDiv');if(w)w.style.display='block'; }
 function resetAll(){ localStorage.clear();location.reload(); }
