@@ -502,7 +502,7 @@ input:checked+.tsl::before{transform:translateX(18px);background:#080f0a}
           <div style="position:relative;width:64px;height:64px">
             <div style="position:absolute;inset:0;border:3px solid var(--border2);border-radius:50%"></div>
             <div style="position:absolute;inset:0;border:3px solid transparent;border-top-color:var(--green);border-radius:50%;animation:spin 1s linear infinite"></div>
-            <div style="position:absolute;inset:50%;transform:translate(-50%,-50%);font-size:1.6rem">⛳</div>
+            
           </div>
           <div style="font-size:.95rem;font-weight:700;color:var(--text)" id="schwungStatus">Frames werden extrahiert...</div>
           <div style="width:100%;background:var(--border2);border-radius:100px;height:6px;overflow:hidden">
@@ -1429,37 +1429,88 @@ function deleteRound(idx){
 // ── SCHWUNG ──
 var lastSchwungAnalysis='';
 
+function extractFramesWithProgress(file, count){
+  var lastProgress=10;
+  var progressTimer=setInterval(function(){
+    lastProgress=Math.min(lastProgress+2,38);
+    setSchwungStatus('Frames werden extrahiert...', lastProgress, 'Video wird verarbeitet...');
+  },500);
+  return extractFrames(file, count).then(function(frames){
+    clearInterval(progressTimer);
+    return frames;
+  }).catch(function(e){
+    clearInterval(progressTimer);
+    throw e;
+  });
+}
 function extractFrames(file, count){
   return new Promise(function(resolve){
     var video=document.createElement('video');
-    video.preload='metadata';
+    video.preload='auto';
     video.muted=true;
     video.playsInline=true;
     var url=URL.createObjectURL(file);
     video.src=url;
-    video.addEventListener('loadedmetadata',function(){
-      var duration=video.duration;
-      var frames=[];
-      var times=[];
-      for(var i=0;i<count;i++) times.push(duration*(i+1)/(count+1));
-      var idx=0;
-      function seekNext(){
-        if(idx>=times.length){ URL.revokeObjectURL(url); resolve(frames); return; }
-        video.currentTime=times[idx];
-      }
-      video.addEventListener('seeked',function(){
+    var frames=[];
+    var times=[];
+    var idx=0;
+    var settled=false;
+    var seekTimeout=null;
+
+    function finish(){
+      if(settled) return;
+      settled=true;
+      clearTimeout(seekTimeout);
+      URL.revokeObjectURL(url);
+      resolve(frames);
+    }
+
+    function captureFrame(){
+      try{
         var canvas=document.createElement('canvas');
-        var scale=Math.min(1,640/video.videoWidth);
-        canvas.width=Math.round(video.videoWidth*scale);
-        canvas.height=Math.round(video.videoHeight*scale);
+        var scale=Math.min(1,640/(video.videoWidth||640));
+        canvas.width=Math.max(1,Math.round((video.videoWidth||640)*scale));
+        canvas.height=Math.max(1,Math.round((video.videoHeight||480)*scale));
         canvas.getContext('2d').drawImage(video,0,0,canvas.width,canvas.height);
-        frames.push(canvas.toDataURL('image/jpeg',0.8).split(',')[1]);
+        var dataUrl=canvas.toDataURL('image/jpeg',0.75);
+        if(dataUrl&&dataUrl.indexOf(',')>=0){
+          frames.push(dataUrl.split(',')[1]);
+        }
+      }catch(e){}
+    }
+
+    function seekNext(){
+      if(settled) return;
+      if(idx>=times.length){ finish(); return; }
+      clearTimeout(seekTimeout);
+      // Fallback: if seeked event doesn't fire within 3s, capture anyway and move on
+      seekTimeout=setTimeout(function(){
+        captureFrame();
         idx++;
         seekNext();
-      });
+      },3000);
+      video.currentTime=times[idx];
+    }
+
+    video.addEventListener('seeked',function(){
+      clearTimeout(seekTimeout);
+      captureFrame();
+      idx++;
       seekNext();
     });
-    video.addEventListener('error',function(){ resolve([]); });
+
+    video.addEventListener('loadedmetadata',function(){
+      var duration=video.duration;
+      if(!duration||!isFinite(duration)||duration<=0){ finish(); return; }
+      for(var i=0;i<count;i++) times.push(duration*(i+0.5)/count);
+      seekNext();
+    });
+
+    video.addEventListener('error',function(){ finish(); });
+
+    // Overall safety timeout: never hang longer than 25s total
+    setTimeout(function(){ finish(); }, 25000);
+
     video.load();
   });
 }
@@ -1473,7 +1524,7 @@ function onSchwVid(inp){
   document.getElementById('schwungResult').style.display='none';
   setSchwungStatus('Frames werden extrahiert...', 10, 'Video wird vorbereitet...');
 
-  extractFrames(file, 20).then(function(frames){
+  extractFramesWithProgress(file, 20).then(function(frames){
     if(!frames||frames.length===0){
       document.getElementById('schwungLoading').style.display='none';
       document.getElementById('schwungUpload').style.display='block';
