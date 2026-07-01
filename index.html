@@ -145,7 +145,7 @@ footer p{font-size:.82rem;color:#3a5a42;margin-top:.4rem}
     </svg>
     <div class="logo"><span>Swing</span>Mind</div>
   </div>
-    <button class="nav-cta" onclick="window.location.href='app.html'">App öffnen</button>
+    <button class="nav-cta" onclick="openInstall()">App öffnen</button>
 </nav>
 
 <!-- HERO -->
@@ -154,10 +154,10 @@ footer p{font-size:.82rem;color:#3a5a42;margin-top:.4rem}
   <h1>Der Golf Coach der dich <span>wirklich kennt.</span></h1>
   <p>Kein teurer Trainer. Kein 2-Monats-Kurs. Ein System das deine KI in einen persönlichen Golf Coach verwandelt — der sich alles über dich merkt.</p>
   <div class="hero-btns">
-    <button class="btn-primary" onclick="window.location.href='app.html'">App kostenlos starten ⛳</button>
+    <button class="btn-primary" onclick="openInstall()">App kostenlos starten ⛳</button>
     <button class="btn-secondary" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">Wie funktioniert's?</button>
   </div>
-  <button onclick="openInstall()" style="margin-top:1.1rem;background:none;border:none;color:var(--green);font-size:.85rem;font-family:var(--sans);cursor:pointer;text-decoration:underline;text-underline-offset:3px">📲 Auf den Home-Bildschirm installieren →</button>
+
   <p class="hero-note">10 Nachrichten/Tag kostenlos · Als App installierbar · Kein App Store nötig</p>
 </div>
 
@@ -248,7 +248,7 @@ footer p{font-size:.82rem;color:#3a5a42;margin-top:.4rem}
         <li>Runden-Tracking & Statistiken</li>
         <li>Funktioniert direkt im Browser</li>
       </ul>
-      <button class="price-btn" onclick="window.location.href='app.html'">App kostenlos starten ⛳</button>
+      <button class="price-btn" onclick="openInstall()">App kostenlos starten ⛳</button>
     </div>
 
     <div class="price-card featured">
@@ -312,7 +312,7 @@ footer p{font-size:.82rem;color:#3a5a42;margin-top:.4rem}
   <div class="section-label" style="display:flex;justify-content:center">Loslegen</div>
   <h2>Dein erster Trainingstag fängt heute an.</h2>
   <p>Öffne die App und erlebe selbst wie gut dein persönlicher AI Golf Coach werden kann.</p>
-  <button class="btn-primary" onclick="window.location.href='app.html'">App jetzt starten ⛳</button>
+  <button class="btn-primary" onclick="openInstall()">App jetzt starten ⛳</button>
 </div>
 
 <!-- FOOTER -->
@@ -375,11 +375,21 @@ footer p{font-size:.82rem;color:#3a5a42;margin-top:.4rem}
         <div style="display:flex;gap:.85rem;align-items:center">
           <svg width="46" height="46" viewBox="0 0 46 46" style="flex-shrink:0">
             <rect width="46" height="46" rx="11" fill="rgba(74,222,128,0.1)"/>
+            <circle cx="23" cy="17" r="2" fill="#4ade80"/>
+            <circle cx="23" cy="23" r="2" fill="#4ade80"/>
+            <circle cx="23" cy="29" r="2" fill="#4ade80"/>
+          </svg>
+          <p style="font-size:.85rem;line-height:1.45"><strong>3.</strong> Tippe auf <strong>"Mehr anzeigen"</strong></p>
+        </div>
+
+        <div style="display:flex;gap:.85rem;align-items:center">
+          <svg width="46" height="46" viewBox="0 0 46 46" style="flex-shrink:0">
+            <rect width="46" height="46" rx="11" fill="rgba(74,222,128,0.1)"/>
             <rect x="9" y="9" width="28" height="28" rx="6" fill="none" stroke="#4ade80" stroke-width="1.6"/>
             <line x1="23" y1="16" x2="23" y2="30" stroke="#4ade80" stroke-width="1.8" stroke-linecap="round"/>
             <line x1="16" y1="23" x2="30" y2="23" stroke="#4ade80" stroke-width="1.8" stroke-linecap="round"/>
           </svg>
-          <p style="font-size:.85rem;line-height:1.45"><strong>3.</strong> Scrolle runter und wähle <strong>"Zum Home-Bildschirm"</strong></p>
+          <p style="font-size:.85rem;line-height:1.45"><strong>4.</strong> Wähle <strong>"Zum Home-Bildschirm"</strong></p>
         </div>
 
         <div style="display:flex;gap:.85rem;align-items:center">
@@ -388,7 +398,7 @@ footer p{font-size:.82rem;color:#3a5a42;margin-top:.4rem}
             <rect x="11" y="11" width="24" height="24" rx="6" fill="#4ade80"/>
             <text x="23" y="27" text-anchor="middle" font-size="11" font-weight="700" fill="#080f0a" font-family="sans-serif">S</text>
           </svg>
-          <p style="font-size:.85rem;line-height:1.45"><strong>4.</strong> Fertig! SwingMind erscheint als App-Icon</p>
+          <p style="font-size:.85rem;line-height:1.45"><strong>5.</strong> Fertig! SwingMind erscheint als App-Icon</p>
         </div>
 
       </div>
@@ -440,7 +450,7 @@ footer p{font-size:.82rem;color:#3a5a42;margin-top:.4rem}
       </div>
     </div>
 
-    <button onclick="window.location.href='app.html'" style="width:100%;background:var(--green);color:#080f0a;border:none;border-radius:100px;padding:.85rem;font-size:.92rem;font-weight:600;cursor:pointer;font-family:var(--sans)">App jetzt öffnen ⛳</button>
+    <button onclick="if(typeof gtag==='function'){gtag('event','app_open_from_install');} window.location.href='app.html'" style="width:100%;background:var(--green);color:#080f0a;border:none;border-radius:100px;padding:.85rem;font-size:.92rem;font-weight:600;cursor:pointer;font-family:var(--sans)">App jetzt öffnen ⛳</button>
   </div>
 </div>
 
@@ -452,6 +462,9 @@ function openInstall(){
   document.getElementById('iosInstructions').style.display = isAndroid ? 'none' : 'block';
   document.getElementById('androidInstructions').style.display = isAndroid ? 'block' : 'none';
   modal.style.display = 'flex';
+  if(typeof gtag === 'function'){
+    gtag('event', 'install_modal_open', { platform: isAndroid ? 'android' : 'ios' });
+  }
 }
 function closeInstall(){
   var modal=document.getElementById('installModal');
