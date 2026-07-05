@@ -2,6 +2,17 @@
 <html lang="de" data-theme="dark">
 <head>
 <meta charset="UTF-8">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z2QCLC5STC"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-Z2QCLC5STC');
+  function track(event, params){
+    if(typeof gtag==='function') gtag('event', event, params||{});
+  }
+</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="/manifest.json">
@@ -790,6 +801,7 @@ function finish(){
     gshort:gv('gshort'),glong:gv('glong'),platform:gv('platform')
   };
   localStorage.setItem('sm_p',JSON.stringify(P));
+  track('onboarding_complete', {side: P.side, experience: P.experience, license: P.license});
   showApp();
   setTimeout(sendWelcome,600);
 }
