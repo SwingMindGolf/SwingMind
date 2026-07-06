@@ -259,6 +259,28 @@ input:checked+.tsl::before{transform:translateX(18px);background:#080f0a}
 </svg>
 
 <!-- ═══════════ ONBOARDING ═══════════ -->
+<div id="installSplash" style="display:none;position:fixed;inset:0;z-index:400;background:var(--bg);overflow-y:auto;flex-direction:column;align-items:center;padding:2.5rem 1.5rem 2rem;text-align:center">
+  <div style="margin-bottom:.3rem;font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;letter-spacing:-.03em"><span style="color:var(--green)">Swing</span><span style="color:var(--text)">Mind</span></div>
+  <div style="background:var(--green);color:#080f0a;font-size:.68rem;font-weight:700;padding:.28rem .8rem;border-radius:100px;margin:0 0 1.4rem">NUR NOCH 1 SCHRITT</div>
+  <h2 style="font-family:'Syne',sans-serif;font-size:1.25rem;font-weight:800;line-height:1.3;margin-bottom:.5rem" id="splashTitle">Hol dir SwingMind<br>auf deinen Home-Bildschirm</h2>
+  <p style="font-size:.8rem;color:var(--muted);margin-bottom:1.6rem">Dauert 10 Sekunden — dann hast du deinen Coach<br>immer griffbereit wie eine echte App.</p>
+
+  <div id="splashSteps" style="width:100%;max-width:400px;display:flex;flex-direction:column;gap:.6rem;margin-bottom:1.5rem"></div>
+
+  <div id="splashAndroidHint" style="display:none;width:100%;max-width:400px;background:var(--gdim);border-radius:12px;padding:.7rem .9rem;font-size:.74rem;color:var(--green);line-height:1.5;margin-bottom:1.25rem">💡 Oft zeigt Chrome unten automatisch einen <strong>"Installieren"</strong>-Hinweis — einfach darauf tippen.</div>
+
+  <button onclick="splashContinue()" style="background:none;border:none;color:var(--muted2);font-size:.75rem;cursor:pointer;text-decoration:underline;text-underline-offset:3px;font-family:inherit;margin-top:auto;padding:.8rem">Ohne Installation fortfahren</button>
+</div>
+<style>
+@keyframes splashPulse{0%{box-shadow:0 0 0 0 rgba(74,222,128,.45)}70%{box-shadow:0 0 0 14px rgba(74,222,128,0)}100%{box-shadow:0 0 0 0 rgba(74,222,128,0)}}
+.splash-step{background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:.8rem 1rem;display:flex;align-items:center;gap:.85rem;text-align:left}
+.splash-step.hl{border:1.5px solid var(--green)}
+.splash-num{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:800;flex-shrink:0;background:var(--gdim);color:var(--green)}
+.splash-step.hl .splash-num{background:var(--green);color:#080f0a}
+.splash-ico{width:44px;height:44px;border-radius:12px;background:var(--gdim);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.splash-step.hl .splash-ico{animation:splashPulse 1.6s infinite}
+.splash-txt{font-size:.82rem;line-height:1.45;color:var(--text)}
+</style>
 <div id="onboarding" class="on">
 <div class="ob-inner">
   <div class="ob-logo" style="position:relative"><span>Swing</span>Mind
@@ -736,6 +758,7 @@ let holeFilter='all', countFilter=10;
 window.addEventListener('load',function(){
   if(DEV){ P=DEV_P; prem=true; }
   else { P=JSON.parse(localStorage.getItem('sm_p')||'null'); prem=localStorage.getItem('sm_ul')==='1'; }
+  setTimeout(checkInstallSplash, 400);
   msgs=JSON.parse(localStorage.getItem('sm_msgs')||'[]');
   rounds=JSON.parse(localStorage.getItem('sm_rounds')||'[]');
   var th=localStorage.getItem('sm_theme')||'dark';
@@ -803,7 +826,6 @@ function finish(){
   localStorage.setItem('sm_p',JSON.stringify(P));
   track('onboarding_complete', {side: P.side, experience: P.experience, license: P.license});
   showApp();
-  setTimeout(sendWelcome,600);
 }
 
 // ── APP ──
@@ -811,6 +833,7 @@ function showApp(){
   document.getElementById('onboarding').classList.remove('on');
   document.getElementById('app').classList.add('on');
   updHdr(); buildCats(); renderMsgs(); renderStats(); updSettings(); renderHints(); loadAv();
+  showWelcome();
 }
 function updHdr(){
   if(!P) return;
@@ -824,24 +847,63 @@ function updHdr(){
   if(prem && ml) ml.style.display='none';
 }
 
+// ── INSTALL SPLASH ──
+var SHARE_SVG='<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M12 3v12M7 8l5-5 5 5" stroke-linecap="round" stroke-linejoin="round"/><rect x="5" y="11" width="14" height="10" rx="2"/></svg>';
+var DOTS_SVG='<svg width="22" height="22" viewBox="0 0 24 24" fill="var(--green)"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>';
+var PLUS_SVG='<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="4"/><line x1="12" y1="9" x2="12" y2="15" stroke-linecap="round"/><line x1="9" y1="12" x2="15" y2="12" stroke-linecap="round"/></svg>';
+var LIST_SVG='<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><line x1="5" y1="7" x2="19" y2="7" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke-linecap="round"/><line x1="5" y1="17" x2="13" y2="17" stroke-linecap="round"/></svg>';
+
+function splashStep(num, icon, text, highlight){
+  return '<div class="splash-step'+(highlight?' hl':'')+'"><div class="splash-num">'+num+'</div><div class="splash-ico">'+icon+'</div><div class="splash-txt">'+text+'</div></div>';
+}
+
+function checkInstallSplash(){
+  var standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  if(standalone) return;
+  if(localStorage.getItem('sm_splash_seen')==='1') return;
+  var ua = navigator.userAgent;
+  var isAndroid = /Android/i.test(ua);
+  var steps = document.getElementById('splashSteps');
+  var hint = document.getElementById('splashAndroidHint');
+  if(!steps) return;
+  if(isAndroid){
+    steps.innerHTML =
+      splashStep(1, DOTS_SVG, 'Tippe oben rechts auf das <strong>⋮ Menü</strong>', true)+
+      splashStep(2, PLUS_SVG, 'Wähle <strong>"App installieren"</strong> oder <strong>"Zum Startbildschirm hinzufügen"</strong>', false);
+    if(hint) hint.style.display='block';
+  } else {
+    steps.innerHTML =
+      splashStep(1, SHARE_SVG, 'Tippe in der Browserleiste auf das <strong>Teilen-Symbol</strong>', true)+
+      splashStep(2, LIST_SVG, 'Wähle <strong>"Mehr anzeigen"</strong>', false)+
+      splashStep(3, PLUS_SVG, 'Tippe auf <strong>"Zum Home-Bildschirm"</strong>', false);
+  }
+  document.getElementById('installSplash').style.display='flex';
+  track('splash_shown', {platform: isAndroid?'android':'ios'});
+}
+
+function splashContinue(){
+  localStorage.setItem('sm_splash_seen','1');
+  var s=document.getElementById('installSplash');
+  if(s) s.style.display='none';
+  track('splash_continue_browser');
+}
+
 // ── TABS ──
 var lastCoachState = 'welcome';
 function goCoach(){
   goTab('coach');
   var m=document.getElementById('msgs');
   var hasChat=m&&m.children.length>0;
-  if(lastCoachState==='chat'&&hasChat){
-    // Return to chat
-    var w=document.getElementById('welcomeDiv');
-    if(w) w.style.display='none';
-    if(m) m.style.display='block';
+  if(lastCoachState==='chat'&&hasChat&&currentCat){
+    hideWel();
   } else {
     showWelcome();
   }
 }
 function showWelcome(){
-  saveMsgs();
+  try{ saveMsgs(); }catch(e){}
   currentCat=null;
+  currentCatPrompts=[];
   msgs=loadCatMsgs(null);
   lastCoachState='welcome';
   var bb=document.getElementById('backBtn'); if(bb) bb.style.display='none';
@@ -850,10 +912,14 @@ function showWelcome(){
   var m=document.getElementById('msgs');
   if(w) w.style.display='block';
   if(m) m.style.display='none';
+  var iw=document.querySelector('.input-wrap'); if(iw) iw.style.display='none';
   buildCats();
-  renderHints();
   var g=document.getElementById('wgreet');
   if(g&&P) g.textContent='Hey '+(P.name||'').split(' ')[0]+'!';
+  // Reset scroll so tiles are visible (fixes white page after long chats)
+  var cs=document.getElementById('chatScroll'); if(cs) cs.scrollTop=0;
+  var tc=document.getElementById('tab-coach'); if(tc) tc.scrollTop=0;
+  window.scrollTo(0,0);
 }
 function goSchwung(){
   if(!prem){ openPM(); return; }
@@ -965,6 +1031,7 @@ function restoreHints(){
 function hideWel(){
   var w=document.getElementById('welcomeDiv'); if(w) w.style.display='none';
   var m=document.getElementById('msgs'); if(m) m.style.display='block';
+  var iw=document.querySelector('.input-wrap'); if(iw) iw.style.display='';
   lastCoachState='chat';
   var bb=document.getElementById('backBtn'); if(bb) bb.style.display='block';
 }
@@ -978,6 +1045,7 @@ function canSend(){ return prem||getMC()<FREE; }
 
 // ── SEND ──
 async function send(){
+  if(!currentCat){ showWelcome(); return; }
   var inp=document.getElementById('chatIn'); if(!inp) return;
   var txt=inp.value.trim();
   if(!txt&&!pendVid) return;
@@ -1008,6 +1076,7 @@ async function send(){
   pendVid=null;
 }
 function sendText(txt){
+  if(!currentCat){ showWelcome(); return; }
   if(!txt||loading) return;
   if(!canSend()){ showLim(); return; }
   var inp=document.getElementById('chatIn');
@@ -1618,6 +1687,8 @@ function loadDetailedAnalysis(){
 }
 function resetSchwung(){
   document.getElementById('schwungResult').style.display='none';
+  document.getElementById('schwungLoading').style.display='none';
+  document.getElementById('schwungUpload').style.display='block';
   document.getElementById('schwVid').value='';
   lastSchwungAnalysis='';
 }

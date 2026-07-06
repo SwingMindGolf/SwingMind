@@ -145,7 +145,7 @@ footer p{font-size:.82rem;color:#3a5a42;margin-top:.4rem}
     </svg>
     <div class="logo"><span>Swing</span>Mind</div>
   </div>
-    <button class="nav-cta" onclick="openInstall()">App öffnen</button>
+    <button class="nav-cta" onclick="startApp()">App öffnen</button>
 </nav>
 
 <!-- HERO -->
@@ -154,7 +154,7 @@ footer p{font-size:.82rem;color:#3a5a42;margin-top:.4rem}
   <h1>Der Golf Coach der dich <span>wirklich kennt.</span></h1>
   <p>Kein teurer Trainer. Kein 2-Monats-Kurs. Ein System das deine KI in einen persönlichen Golf Coach verwandelt — der sich alles über dich merkt.</p>
   <div class="hero-btns">
-    <button class="btn-primary" onclick="openInstall()">App kostenlos starten ⛳</button>
+    <button class="btn-primary" onclick="startApp()">App kostenlos starten ⛳</button>
     <button class="btn-secondary" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">Wie funktioniert's?</button>
   </div>
 
@@ -248,7 +248,7 @@ footer p{font-size:.82rem;color:#3a5a42;margin-top:.4rem}
         <li>Runden-Tracking & Statistiken</li>
         <li>Funktioniert direkt im Browser</li>
       </ul>
-      <button class="price-btn" onclick="openInstall()">App kostenlos starten ⛳</button>
+      <button class="price-btn" onclick="startApp()">App kostenlos starten ⛳</button>
     </div>
 
     <div class="price-card featured">
@@ -312,7 +312,7 @@ footer p{font-size:.82rem;color:#3a5a42;margin-top:.4rem}
   <div class="section-label" style="display:flex;justify-content:center">Loslegen</div>
   <h2>Dein erster Trainingstag fängt heute an.</h2>
   <p>Öffne die App und erlebe selbst wie gut dein persönlicher AI Golf Coach werden kann.</p>
-  <button class="btn-primary" onclick="openInstall()">App jetzt starten ⛳</button>
+  <button class="btn-primary" onclick="startApp()">App jetzt starten ⛳</button>
 </div>
 
 <!-- FOOTER -->
@@ -340,140 +340,13 @@ footer p{font-size:.82rem;color:#3a5a42;margin-top:.4rem}
 </footer>
 
 
-<!-- INSTALL MODAL -->
-<div id="installModal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:1.5rem">
-  <div style="background:var(--bg2);border:1px solid var(--gborder2);border-radius:20px;padding:2rem 1.75rem;max-width:420px;width:100%;position:relative">
-    <button onclick="closeInstall()" style="position:absolute;top:1rem;right:1rem;background:none;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer;line-height:1">×</button>
-    <h3 style="font-family:var(--serif);font-size:1.25rem;font-weight:800;margin-bottom:.4rem">App installieren</h3>
-    <p style="color:var(--muted);font-size:.85rem;margin-bottom:1.3rem">Kein App Store nötig — in 10 Sekunden auf deinem Home-Bildschirm.</p>
 
-    <div id="iosInstructions">
-      <div style="display:flex;align-items:center;gap:.4rem;margin-bottom:1rem">
-        <span style="background:var(--gdim);color:var(--green);font-size:.7rem;font-weight:700;padding:.2rem .6rem;border-radius:100px">iPhone / Safari</span>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:1rem;margin-bottom:1.3rem">
-
-        <div style="display:flex;gap:.85rem;align-items:center">
-          <svg width="46" height="46" viewBox="0 0 46 46" style="flex-shrink:0">
-            <rect width="46" height="46" rx="11" fill="rgba(74,222,128,0.1)"/>
-            <rect x="9" y="16" width="28" height="16" rx="3" fill="none" stroke="#4ade80" stroke-width="1.6"/>
-            <text x="23" y="27" text-anchor="middle" font-size="7" fill="#4ade80" font-family="sans-serif">swingmind.de</text>
-          </svg>
-          <p style="font-size:.85rem;line-height:1.45"><strong>1.</strong> Öffne <strong>swingmind.de/app.html</strong> in Safari</p>
-        </div>
-
-        <div style="display:flex;gap:.85rem;align-items:center">
-          <svg width="46" height="46" viewBox="0 0 46 46" style="flex-shrink:0">
-            <rect width="46" height="46" rx="11" fill="rgba(74,222,128,0.1)"/>
-            <rect x="14" y="13" width="3" height="14" rx="1.5" fill="#4ade80"/>
-            <path d="M15.5 13 L10 19 M15.5 13 L21 19" stroke="#4ade80" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-            <rect x="9" y="29" width="13" height="10" rx="2.5" fill="none" stroke="#4ade80" stroke-width="1.6"/>
-          </svg>
-          <p style="font-size:.85rem;line-height:1.45"><strong>2.</strong> Tippe unten in der Leiste auf das <strong>Teilen-Symbol</strong></p>
-        </div>
-
-        <div style="display:flex;gap:.85rem;align-items:center">
-          <svg width="46" height="46" viewBox="0 0 46 46" style="flex-shrink:0">
-            <rect width="46" height="46" rx="11" fill="rgba(74,222,128,0.1)"/>
-            <circle cx="23" cy="17" r="2" fill="#4ade80"/>
-            <circle cx="23" cy="23" r="2" fill="#4ade80"/>
-            <circle cx="23" cy="29" r="2" fill="#4ade80"/>
-          </svg>
-          <p style="font-size:.85rem;line-height:1.45"><strong>3.</strong> Tippe auf <strong>"Mehr anzeigen"</strong></p>
-        </div>
-
-        <div style="display:flex;gap:.85rem;align-items:center">
-          <svg width="46" height="46" viewBox="0 0 46 46" style="flex-shrink:0">
-            <rect width="46" height="46" rx="11" fill="rgba(74,222,128,0.1)"/>
-            <rect x="9" y="9" width="28" height="28" rx="6" fill="none" stroke="#4ade80" stroke-width="1.6"/>
-            <line x1="23" y1="16" x2="23" y2="30" stroke="#4ade80" stroke-width="1.8" stroke-linecap="round"/>
-            <line x1="16" y1="23" x2="30" y2="23" stroke="#4ade80" stroke-width="1.8" stroke-linecap="round"/>
-          </svg>
-          <p style="font-size:.85rem;line-height:1.45"><strong>4.</strong> Wähle <strong>"Zum Home-Bildschirm"</strong></p>
-        </div>
-
-        <div style="display:flex;gap:.85rem;align-items:center">
-          <svg width="46" height="46" viewBox="0 0 46 46" style="flex-shrink:0">
-            <rect width="46" height="46" rx="11" fill="rgba(74,222,128,0.16)"/>
-            <rect x="11" y="11" width="24" height="24" rx="6" fill="#4ade80"/>
-            <text x="23" y="27" text-anchor="middle" font-size="11" font-weight="700" fill="#080f0a" font-family="sans-serif">S</text>
-          </svg>
-          <p style="font-size:.85rem;line-height:1.45"><strong>5.</strong> Fertig! SwingMind erscheint als App-Icon</p>
-        </div>
-
-      </div>
-    </div>
-
-    <div id="androidInstructions" style="display:none">
-      <div style="display:flex;align-items:center;gap:.4rem;margin-bottom:1rem">
-        <span style="background:var(--gdim);color:var(--green);font-size:.7rem;font-weight:700;padding:.2rem .6rem;border-radius:100px">Android / Chrome</span>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:1rem;margin-bottom:1.3rem">
-
-        <div style="display:flex;gap:.85rem;align-items:center">
-          <svg width="46" height="46" viewBox="0 0 46 46" style="flex-shrink:0">
-            <rect width="46" height="46" rx="11" fill="rgba(74,222,128,0.1)"/>
-            <rect x="9" y="16" width="28" height="16" rx="3" fill="none" stroke="#4ade80" stroke-width="1.6"/>
-            <text x="23" y="27" text-anchor="middle" font-size="7" fill="#4ade80" font-family="sans-serif">swingmind.de</text>
-          </svg>
-          <p style="font-size:.85rem;line-height:1.45"><strong>1.</strong> Öffne <strong>swingmind.de/app.html</strong> in Chrome</p>
-        </div>
-
-        <div style="display:flex;gap:.85rem;align-items:center">
-          <svg width="46" height="46" viewBox="0 0 46 46" style="flex-shrink:0">
-            <rect width="46" height="46" rx="11" fill="rgba(74,222,128,0.1)"/>
-            <circle cx="23" cy="17" r="2" fill="#4ade80"/>
-            <circle cx="23" cy="23" r="2" fill="#4ade80"/>
-            <circle cx="23" cy="29" r="2" fill="#4ade80"/>
-          </svg>
-          <p style="font-size:.85rem;line-height:1.45"><strong>2.</strong> Tippe auf die <strong>drei Punkte</strong> oben rechts</p>
-        </div>
-
-        <div style="display:flex;gap:.85rem;align-items:center">
-          <svg width="46" height="46" viewBox="0 0 46 46" style="flex-shrink:0">
-            <rect width="46" height="46" rx="11" fill="rgba(74,222,128,0.1)"/>
-            <path d="M23 12 v16 M16 22 l7 7 l7-7" stroke="#4ade80" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-            <rect x="13" y="31" width="20" height="3" rx="1.5" fill="#4ade80"/>
-          </svg>
-          <p style="font-size:.85rem;line-height:1.45"><strong>3.</strong> Wähle <strong>"App installieren"</strong></p>
-        </div>
-
-        <div style="display:flex;gap:.85rem;align-items:center">
-          <svg width="46" height="46" viewBox="0 0 46 46" style="flex-shrink:0">
-            <rect width="46" height="46" rx="11" fill="rgba(74,222,128,0.16)"/>
-            <rect x="11" y="11" width="24" height="24" rx="6" fill="#4ade80"/>
-            <text x="23" y="27" text-anchor="middle" font-size="11" font-weight="700" fill="#080f0a" font-family="sans-serif">S</text>
-          </svg>
-          <p style="font-size:.85rem;line-height:1.45"><strong>4.</strong> Fertig! SwingMind erscheint als App-Icon</p>
-        </div>
-
-      </div>
-    </div>
-
-    <button onclick="if(typeof gtag==='function'){gtag('event','app_open_from_install');} window.location.href='app.html'" style="width:100%;background:var(--green);color:#080f0a;border:none;border-radius:100px;padding:.85rem;font-size:.92rem;font-weight:600;cursor:pointer;font-family:var(--sans)">App jetzt öffnen ⛳</button>
-  </div>
-</div>
 
 <script>
-function openInstall(){
-  var modal=document.getElementById('installModal');
-  if(!modal) return;
-  var isAndroid = /Android/i.test(navigator.userAgent);
-  document.getElementById('iosInstructions').style.display = isAndroid ? 'none' : 'block';
-  document.getElementById('androidInstructions').style.display = isAndroid ? 'block' : 'none';
-  modal.style.display = 'flex';
-  if(typeof gtag === 'function'){
-    gtag('event', 'install_modal_open', { platform: isAndroid ? 'android' : 'ios' });
-  }
+function startApp(){
+  if(typeof gtag==='function'){ gtag('event','app_start_click'); }
+  window.location.href='app.html';
 }
-function closeInstall(){
-  var modal=document.getElementById('installModal');
-  if(modal) modal.style.display = 'none';
-}
-document.addEventListener('click', function(e){
-  if(e.target && e.target.id === 'installModal') closeInstall();
-});
 </script>
-
 </body>
 </html>
