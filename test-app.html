@@ -1670,14 +1670,20 @@ function onSchwVid(inp){
 }
 
 var lastFrames = [];
+function extractMainProblem(){
+  if(!lastSchwungAnalysis) return '';
+  var m=lastSchwungAnalysis.match(/HAUPTPROBLEM[:\s]*([\s\S]{10,400}?)(?=\n\s*\n|\n\s*\d\.|$)/i);
+  if(m&&m[1]) return m[1].trim();
+  return lastSchwungAnalysis.slice(-400);
+}
 function createVisualFeedback(){
   if(!lastFrames.length){ alert('Lade zuerst ein neues Video hoch.'); return; }
   var btn=document.getElementById('visualBtn');
-  if(btn){ btn.textContent='Wird erstellt... (bis zu 30 Sek.)'; btn.disabled=true; }
+  if(btn){ btn.textContent='Wird erstellt... (bis zu 45 Sek.)'; btn.disabled=true; }
   fetch(W,{
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({mode:'visual',frame:lastFrames[0],profile:P})
+    body:JSON.stringify({mode:'visual',frames:lastFrames,problem:extractMainProblem(),profile:P})
   })
   .then(function(r){return r.json();})
   .then(function(data){
