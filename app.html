@@ -551,6 +551,11 @@ input:checked+.tsl::before{transform:translateX(18px);background:#080f0a}
             <button onclick="resetSchwung()" style="background:none;border:1px solid var(--border);border-radius:100px;padding:.3rem .8rem;font-size:.72rem;color:var(--muted);cursor:pointer;font-family:inherit">Neues Video</button>
           </div>
           <div id="schwungResultText" style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1rem;font-size:.85rem;line-height:1.7;white-space:pre-wrap;margin-bottom:.75rem"></div>
+          <div id="visualResult" style="display:none;margin-bottom:.75rem">
+            <img id="visualImg" src="" alt="Visual-Vergleich" style="width:100%;border-radius:14px;border:1px solid var(--border)">
+            <a id="visualDl" href="" download="swingmind-vergleich.png" style="display:block;text-align:center;margin-top:.4rem;font-size:.72rem;color:var(--muted);text-decoration:underline;text-underline-offset:2px">Bild speichern</a>
+          </div>
+          <button onclick="createVisualFeedback()" id="visualBtn" style="width:100%;margin-bottom:.5rem;background:var(--gdim);border:1px solid var(--green);border-radius:100px;padding:.7rem;font-size:.82rem;font-weight:600;color:var(--green);cursor:pointer;font-family:inherit">📸 Visual-Vergleich erstellen</button>
           <button onclick="loadDetailedAnalysis()" id="detailBtn" style="width:100%;margin-bottom:.5rem;background:var(--card);border:1px solid var(--border2);border-radius:100px;padding:.7rem;font-size:.82rem;font-weight:500;color:var(--muted);cursor:pointer;font-family:inherit">🔍 Detaillierte Analyse laden</button>
           <button onclick="sendSchwungToCoach()" style="width:100%;background:var(--green);color:#080f0a;border:none;border-radius:100px;padding:.875rem;font-size:.9rem;font-weight:600;cursor:pointer;font-family:inherit">Mit Coach besprechen →</button>
         </div>
@@ -1665,6 +1670,40 @@ function onSchwVid(inp){
 }
 
 var lastFrames = [];
+function extractMainProblem(){
+  if(!lastSchwungAnalysis) return '';
+  var m=lastSchwungAnalysis.match(/HAUPTPROBLEM[:\s]*([\s\S]{10,400}?)(?=\n\s*\n|\n\s*\d\.|$)/i);
+  if(m&&m[1]) return m[1].trim();
+  return lastSchwungAnalysis.slice(-400);
+}
+function createVisualFeedback(){
+  if(!lastFrames.length){ alert('Lade zuerst ein neues Video hoch.'); return; }
+  var btn=document.getElementById('visualBtn');
+  if(btn){ btn.textContent='Wird erstellt... (bis zu 45 Sek.)'; btn.disabled=true; }
+  fetch(W,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({mode:'visual',frames:lastFrames,problem:extractMainProblem(),profile:P})
+  })
+  .then(function(r){return r.json();})
+  .then(function(data){
+    if(data.image){
+      var src='data:image/png;base64,'+data.image;
+      document.getElementById('visualImg').src=src;
+      document.getElementById('visualDl').href=src;
+      document.getElementById('visualResult').style.display='block';
+      if(btn){ btn.style.display='none'; }
+      track('visual_feedback_created');
+    } else {
+      alert(data.error||'Bild konnte nicht erstellt werden.');
+      if(btn){ btn.textContent='📸 Visual-Vergleich erstellen'; btn.disabled=false; }
+    }
+  })
+  .catch(function(){
+    alert('Verbindungsfehler. Bitte nochmal versuchen.');
+    if(btn){ btn.textContent='📸 Visual-Vergleich erstellen'; btn.disabled=false; }
+  });
+}
 function loadDetailedAnalysis(){
   if(!lastFrames.length){ alert('Lade zuerst ein neues Video hoch.'); return; }
   var btn=document.getElementById('detailBtn');
@@ -1691,6 +1730,8 @@ function resetSchwung(){
   document.getElementById('schwungUpload').style.display='block';
   document.getElementById('schwVid').value='';
   lastSchwungAnalysis='';
+  var vr=document.getElementById('visualResult'); if(vr) vr.style.display='none';
+  var vb=document.getElementById('visualBtn'); if(vb){ vb.style.display='block'; vb.textContent='📸 Visual-Vergleich erstellen'; vb.disabled=false; }
 }
 function sendSchwungToCoach(){
   if(!lastSchwungAnalysis) return;
