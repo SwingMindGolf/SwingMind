@@ -1736,7 +1736,9 @@ function resetSchwung(){
 function sendSchwungToCoach(){
   if(!lastSchwungAnalysis) return;
   goTab('coach');
-  hideWel();
+  var sc=CATS.find(function(c){return c.id==='schwung';});
+  if(sc&&currentCat!=='schwung') selCat(sc);
+  else hideWel();
   var msg='Hier ist meine Schwunganalyse von heute:\n\n'+lastSchwungAnalysis+'\n\nBitte gib mir basierend auf dieser Analyse konkrete Übungen für die nächsten 2 Wochen.';
   setTimeout(function(){ document.getElementById('chatIn').value=msg; send(); },300);
 }
