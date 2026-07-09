@@ -566,6 +566,14 @@ input:checked+.tsl::before{transform:translateX(18px);background:#080f0a}
             <a id="visualDl" href="#" onclick="downloadVisual();return false" style="display:block;text-align:center;margin-top:.4rem;font-size:.72rem;color:var(--muted);text-decoration:underline;text-underline-offset:2px">Vergleichsbild speichern</a>
           </div>
           <button onclick="createVisualFeedback()" id="visualBtn" style="width:100%;margin-bottom:.5rem;background:var(--gdim);border:1px solid var(--green);border-radius:100px;padding:.7rem;font-size:.82rem;font-weight:600;color:var(--green);cursor:pointer;font-family:inherit">📸 Visual-Vergleich erstellen</button>
+          <div id="visualLoading" style="display:none;flex-direction:column;align-items:center;justify-content:center;padding:1.5rem 1rem;gap:.8rem;background:var(--card);border:1px solid var(--border);border-radius:14px;text-align:center;margin-bottom:.5rem">
+            <div style="position:relative;width:44px;height:44px">
+              <div style="position:absolute;inset:0;border:3px solid var(--border2);border-radius:50%"></div>
+              <div style="position:absolute;inset:0;border:3px solid transparent;border-top-color:var(--green);border-radius:50%;animation:spin 1s linear infinite"></div>
+            </div>
+            <div id="visualLoadTxt" style="font-size:.78rem;color:var(--muted)">Visual-Vergleich wird erstellt...</div>
+            <div style="font-size:.68rem;color:var(--muted2)">Dauert bis zu 45 Sekunden</div>
+          </div>
           <button onclick="loadDetailedAnalysis()" id="detailBtn" style="width:100%;margin-bottom:.5rem;background:var(--card);border:1px solid var(--border2);border-radius:100px;padding:.7rem;font-size:.82rem;font-weight:500;color:var(--muted);cursor:pointer;font-family:inherit">🔍 Detaillierte Analyse laden</button>
           <button onclick="sendSchwungToCoach()" style="width:100%;background:var(--green);color:#080f0a;border:none;border-radius:100px;padding:.875rem;font-size:.9rem;font-weight:600;cursor:pointer;font-family:inherit">Mit Coach besprechen →</button>
         </div>
@@ -1687,10 +1695,22 @@ function extractMainProblem(){
   return lastSchwungAnalysis.slice(-400);
 }
 var visualPhase='';
+var visualLoadTimer=null;
 function createVisualFeedback(){
   if(!lastFrames.length){ alert('Lade zuerst ein neues Video hoch.'); return; }
   var btn=document.getElementById('visualBtn');
-  if(btn){ btn.textContent='Wird erstellt... (bis zu 45 Sek.)'; btn.disabled=true; }
+  var lo=document.getElementById('visualLoading');
+  if(btn) btn.style.display='none';
+  if(lo) lo.style.display='flex';
+  var phases=['Frames werden geprüft...','Problem-Phase wird gesucht...','Ideale Position wird berechnet...','Skizze wird gezeichnet...','Gleich fertig...'];
+  var pi=0;
+  var lt=document.getElementById('visualLoadTxt');
+  if(lt) lt.textContent=phases[0];
+  clearInterval(visualLoadTimer);
+  visualLoadTimer=setInterval(function(){
+    pi=Math.min(pi+1,phases.length-1);
+    if(lt) lt.textContent=phases[pi];
+  },8000);
   fetch(W,{
     method:'POST',
     headers:{'Content-Type':'application/json'},
@@ -1698,6 +1718,8 @@ function createVisualFeedback(){
   })
   .then(function(r){return r.json();})
   .then(function(data){
+    clearInterval(visualLoadTimer);
+    var lo2=document.getElementById('visualLoading'); if(lo2) lo2.style.display='none';
     if(data.image){
       visualPhase=data.phase||'Schwungphase';
       var idx=(typeof data.chosenIndex==='number'&&data.chosenIndex>=0&&data.chosenIndex<lastFrames.length)?data.chosenIndex:0;
@@ -1712,12 +1734,14 @@ function createVisualFeedback(){
       track('visual_feedback_created');
     } else {
       alert(data.error||'Bild konnte nicht erstellt werden.');
-      if(btn){ btn.textContent='📸 Visual-Vergleich erstellen'; btn.disabled=false; }
+      if(btn) btn.style.display='block';
     }
   })
   .catch(function(){
+    clearInterval(visualLoadTimer);
+    var lo3=document.getElementById('visualLoading'); if(lo3) lo3.style.display='none';
     alert('Verbindungsfehler. Bitte nochmal versuchen.');
-    if(btn){ btn.textContent='📸 Visual-Vergleich erstellen'; btn.disabled=false; }
+    if(btn) btn.style.display='block';
   });
 }
 function downloadVisual(){
@@ -1770,6 +1794,8 @@ function resetSchwung(){
   document.getElementById('schwVid').value='';
   lastSchwungAnalysis='';
   var vr=document.getElementById('visualResult'); if(vr) vr.style.display='none';
+  var vl=document.getElementById('visualLoading'); if(vl) vl.style.display='none';
+  clearInterval(visualLoadTimer);
   var vb=document.getElementById('visualBtn'); if(vb){ vb.style.display='block'; vb.textContent='📸 Visual-Vergleich erstellen'; vb.disabled=false; }
 }
 function sendSchwungToCoach(){
