@@ -259,6 +259,35 @@ input:checked+.tsl::before{transform:translateX(18px);background:#080f0a}
 </svg>
 
 <!-- ═══════════ ONBOARDING ═══════════ -->
+<div id="firstWelcome" style="display:none;position:fixed;inset:0;z-index:380;background:var(--bg);overflow-y:auto;flex-direction:column;align-items:center;padding:2.5rem 1.4rem 1.5rem;text-align:center">
+  <div style="width:64px;height:64px;background:var(--gdim);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.8rem;margin-bottom:1rem;animation:fwFade .5s ease">🎉</div>
+  <div style="animation:fwFade .5s ease .1s both">
+    <h2 style="font-family:'Syne',sans-serif;font-size:1.25rem;font-weight:800;line-height:1.35;margin-bottom:.4rem">Hey <span id="fwName">Golfer</span>,<br>dein Coach ist bereit!</h2>
+    <p style="font-size:.78rem;color:var(--muted);line-height:1.5;margin-bottom:1.6rem">Ich kenne jetzt dein Profil, deine Schläger und deine Ziele. Lass uns gemeinsam besser werden!</p>
+  </div>
+  <div style="width:100%;max-width:420px;animation:fwFade .5s ease .2s both">
+    <div style="font-size:.64rem;font-weight:700;color:var(--muted2);letter-spacing:.08em;margin-bottom:.6rem">STELL DEINE ERSTE FRAGE — EIN TIPP GENÜGT</div>
+    <div style="display:flex;flex-direction:column;gap:.55rem;margin-bottom:1.25rem">
+      <button onclick="fwAsk('training','Erstelle mir meinen ersten Trainingsplan basierend auf meinen Schwächen und Zielen.','trainingsplan')" style="background:var(--gdim);border:1.5px solid var(--green);border-radius:14px;padding:.85rem .95rem;text-align:left;cursor:pointer;font-family:inherit;animation:fwPulse 2s infinite">
+        <div style="font-size:.82rem;font-weight:700;color:var(--green)">🏋️ Erstelle mir meinen ersten Trainingsplan</div>
+        <div style="font-size:.66rem;color:var(--muted);margin-top:.15rem">Basierend auf deinen Schwächen & Zielen</div>
+      </button>
+      <button onclick="fwAsk('training','Was sollte ich bei meinem Golfspiel als Erstes verbessern? Priorisiere für mich.','verbessern')" style="background:var(--card);border:1px solid var(--bdr2);border-radius:14px;padding:.85rem .95rem;text-align:left;cursor:pointer;font-family:inherit">
+        <div style="font-size:.82rem;font-weight:700;color:var(--text)">🎯 Was sollte ich als Erstes verbessern?</div>
+        <div style="font-size:.66rem;color:var(--muted);margin-top:.15rem">Dein Coach priorisiert für dich</div>
+      </button>
+      <button onclick="fwAsk('equipment','Passt mein Schläger-Setup zu mir? Gib mir einen ehrlichen Equipment-Check.','equipment')" style="background:var(--card);border:1px solid var(--bdr2);border-radius:14px;padding:.85rem .95rem;text-align:left;cursor:pointer;font-family:inherit">
+        <div style="font-size:.82rem;font-weight:700;color:var(--text)">🏑 Passt mein Schläger-Setup zu mir?</div>
+        <div style="font-size:.66rem;color:var(--muted);margin-top:.15rem">Ehrlicher Equipment-Check</div>
+      </button>
+    </div>
+  </div>
+  <button onclick="fwSkip()" style="background:none;border:none;color:var(--muted2);font-size:.72rem;cursor:pointer;text-decoration:underline;text-underline-offset:3px;font-family:inherit;margin-top:auto;padding:.8rem">Erstmal selbst umschauen</button>
+</div>
+<style>
+@keyframes fwFade{0%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes fwPulse{0%,100%{box-shadow:0 0 0 0 rgba(74,222,128,.35)}50%{box-shadow:0 0 0 8px rgba(74,222,128,0)}}
+</style>
 <div id="installSplash" style="display:none;position:fixed;inset:0;z-index:400;background:var(--bg);overflow-y:auto;flex-direction:column;align-items:center;padding:2.5rem 1.5rem 2rem;text-align:center">
   <div style="margin-bottom:.3rem;font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;letter-spacing:-.03em"><span style="color:var(--green)">Swing</span><span style="color:var(--text)">Mind</span></div>
   <div style="background:var(--green);color:#080f0a;font-size:.68rem;font-weight:700;padding:.28rem .8rem;border-radius:100px;margin:0 0 1.4rem">NUR NOCH 1 SCHRITT</div>
@@ -781,6 +810,7 @@ let holeFilter='all', countFilter=10;
 window.addEventListener('load',function(){
   if(DEV){ P=DEV_P; prem=true; }
   else { P=JSON.parse(localStorage.getItem('sm_p')||'null'); prem=localStorage.getItem('sm_ul')==='1'; }
+  if(P) localStorage.setItem('sm_fw_seen','1');
   setTimeout(checkInstallSplash, 400);
   msgs=JSON.parse(localStorage.getItem('sm_msgs')||'[]');
   rounds=JSON.parse(localStorage.getItem('sm_rounds')||'[]');
@@ -849,6 +879,7 @@ function finish(){
   localStorage.setItem('sm_p',JSON.stringify(P));
   track('onboarding_complete', {side: P.side, experience: P.experience, license: P.license});
   showApp();
+  setTimeout(checkFirstWelcome, 300);
 }
 
 // ── APP ──
@@ -909,6 +940,29 @@ function splashContinue(){
   var s=document.getElementById('installSplash');
   if(s) s.style.display='none';
   track('splash_continue_browser');
+}
+
+// ── FIRST WELCOME (einmalig nach erstem Onboarding) ──
+function checkFirstWelcome(){
+  if(localStorage.getItem('sm_fw_seen')==='1') return;
+  localStorage.setItem('sm_fw_seen','1');
+  var n=document.getElementById('fwName');
+  if(n&&P) n.textContent=(P.name||'Golfer').split(' ')[0];
+  document.getElementById('firstWelcome').style.display='flex';
+  track('first_welcome_shown');
+}
+function fwAsk(catId,text,label){
+  document.getElementById('firstWelcome').style.display='none';
+  track('first_welcome_action',{choice:label});
+  var c=CATS.find(function(x){return x.id===catId;});
+  goTab('coach');
+  if(c) selCat(c);
+  setTimeout(function(){ sendText(text); },350);
+}
+function fwSkip(){
+  document.getElementById('firstWelcome').style.display='none';
+  track('first_welcome_skipped');
+  showWelcome();
 }
 
 // ── TABS ──
