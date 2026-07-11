@@ -301,6 +301,22 @@ input:checked+.tsl::before{transform:translateX(18px);background:#080f0a}
   <!-- Tap hint -->
   <div style="position:absolute;top:calc(50% + 40px);left:50%;transform:translateX(-50%);z-index:9;font-size:.6rem;color:rgba(255,255,255,.7);background:rgba(0,0,0,.35);padding:.2rem .6rem;border-radius:100px;pointer-events:none;white-space:nowrap">Tippe auf die Karte zum Messen</div>
 
+
+  <!-- Shot detail sheet -->
+  <div id="gpsShotSheet" style="display:none;position:absolute;bottom:0;left:0;right:0;z-index:20;background:var(--bg);border-radius:22px 22px 0 0;padding:1.25rem 1.25rem calc(env(safe-area-inset-bottom,12px) + 1.25rem);box-shadow:0 -8px 30px rgba(0,0,0,.5)">
+    <div style="text-align:center;margin-bottom:.9rem">
+      <div style="font-size:.66rem;color:var(--muted)">SCHLAG GEMESSEN</div>
+      <div id="gpsSheetDist" style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.9rem;color:var(--green)">0 m</div>
+    </div>
+    <div style="font-size:.64rem;font-weight:700;color:var(--muted2);letter-spacing:.06em;margin-bottom:.4rem">SCHLÄGER</div>
+    <div id="gpsClubRow" style="display:flex;gap:.35rem;flex-wrap:wrap;margin-bottom:.9rem"></div>
+    <div style="font-size:.64rem;font-weight:700;color:var(--muted2);letter-spacing:.06em;margin-bottom:.4rem">WIE WAR DER SCHLAG?</div>
+    <div id="gpsFlightRow" style="display:flex;gap:.35rem;flex-wrap:wrap;margin-bottom:1.1rem"></div>
+    <div style="display:flex;gap:.6rem">
+      <button onclick="gpsSkipShotDetail()" style="flex:1;background:var(--card);border:1px solid var(--bdr2);border-radius:100px;padding:.7rem;font-size:.8rem;color:var(--muted);cursor:pointer;font-family:inherit">Überspringen</button>
+      <button onclick="gpsSaveShotDetail()" style="flex:2;background:var(--green);border:none;border-radius:100px;padding:.7rem;font-size:.8rem;font-weight:700;color:#080f0a;cursor:pointer;font-family:inherit">Speichern</button>
+    </div>
+  </div>
   <!-- Bottom floating panel -->
   <div style="position:absolute;bottom:0;left:0;right:0;z-index:10;background:linear-gradient(to top,rgba(0,0,0,.75),transparent);padding:1.5rem .9rem calc(env(safe-area-inset-bottom,12px) + .9rem)">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.7rem">
@@ -1034,7 +1050,20 @@ function haversine(a,b){
   return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
 }
 
-var gpsSelectedCourse=null;
+
+var GPS_OVERPASS=['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter'];
+function gpsOverpass(q){
+  var i=0;
+  function tryNext(){
+    if(i>=GPS_OVERPASS.length) return Promise.reject(new Error('all failed'));
+    var url=GPS_OVERPASS[i++];
+    return fetch(url,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'data='+encodeURIComponent(q)})
+      .then(function(r){ if(!r.ok) throw new Error('http '+r.status); return r.json(); })
+      .catch(function(){ return tryNext(); });
+  }
+  return tryNext();
+}
+var gpsSelectedCourse=null, gpsRefreshTimer=null, gpsShots=[], gpsPendingShot=null;
 function startGpsRound(){
   if(!navigator.geolocation){ alert('GPS wird von diesem Gerät nicht unterstützt.'); return; }
   document.getElementById('gpsPicker').style.display='flex';
@@ -1056,8 +1085,7 @@ function gpsFindNearbyCourses(){
   if(!gpsPos) return;
   document.getElementById('gpsPickerStatus').textContent='Golfplätze in der Nähe werden gesucht...';
   var q='[out:json][timeout:25];(way["leisure"="golf_course"](around:25000,'+gpsPos.lat+','+gpsPos.lon+');relation["leisure"="golf_course"](around:25000,'+gpsPos.lat+','+gpsPos.lon+'););out center tags;';
-  fetch('https://overpass-api.de/api/interpreter',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'data='+encodeURIComponent(q)})
-  .then(function(r){return r.json();})
+  gpsOverpass(q)
   .then(function(data){
     var list=[];
     (data.elements||[]).forEach(function(el){
@@ -1114,7 +1142,7 @@ function gpsSearchCourses(){
 
 function gpsPlayCourse(course){
   gpsSelectedCourse=course;
-  gpsCurHole=1; gpsScores={}; gpsHoles={}; gpsCourseName=course.name; gpsShotStart=null;
+  gpsCurHole=1; gpsScores={}; gpsHoles={}; gpsCourseName=course.name; gpsShotStart=null; gpsShots=[]; gpsPendingShot=null;
   closeGpsPicker();
   document.getElementById('gpsTracker').style.display='flex';
   document.getElementById('gpsCourse').textContent=course.name;
@@ -1122,6 +1150,8 @@ function gpsPlayCourse(course){
   gpsInitMap();
   gpsUpdateHoleUI();
   track('gps_round_started');
+  clearInterval(gpsRefreshTimer);
+  gpsRefreshTimer=setInterval(function(){ gpsUpdateDistances(); gpsMapUpdate(); },4000);
   try{ if(navigator.wakeLock) navigator.wakeLock.request('screen').then(function(wl){ gpsWakeLock=wl; }).catch(function(){}); }catch(e){}
   // Load holes around the chosen course location
   gpsLoadCourseAt(course.lat, course.lon);
@@ -1137,8 +1167,7 @@ function gpsPlayCourse(course){
 function gpsLoadCourseAt(clat, clon){
   var la=clat, lo=clon;
   var q='[out:json][timeout:25];(way["golf"="hole"](around:1500,'+la+','+lo+');way["golf"="green"](around:1500,'+la+','+lo+');way["golf"="tee"](around:1500,'+la+','+lo+');way["golf"="bunker"](around:1500,'+la+','+lo+');nwr["golf"="bunker"](around:1500,'+la+','+lo+');way["leisure"="golf_course"](around:1500,'+la+','+lo+'););out geom tags;';
-  fetch('https://overpass-api.de/api/interpreter',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'data='+encodeURIComponent(q)})
-  .then(function(r){return r.json();})
+  gpsOverpass(q)
   .then(function(data){
     var holes=[], greens=[], tees=[], bunkers=[];
     (data.elements||[]).forEach(function(el){
@@ -1259,16 +1288,54 @@ function gpsMarkShot(){
   document.getElementById('gpsShotDist').textContent='0 m';
 }
 
+var GPS_CLUBS=['Driver','Holz','Hybrid','Eisen 5','Eisen 6','Eisen 7','Eisen 8','Eisen 9','PW','Wedge'];
+var GPS_FLIGHTS=['Gerade','Slice','Hook','Push','Pull','Getoppt','Fett'];
 function gpsEndShot(){
-  if(gpsShotStart&&gpsPos){
-    var dist=Math.round(haversine(gpsShotStart,gpsPos));
-    var ls=document.getElementById('gpsLastShot');
-    ls.textContent='Letzter Schlag: '+dist+' m';
-    ls.style.display='block';
-  }
+  var dist=0;
+  if(gpsShotStart&&gpsPos) dist=Math.round(haversine(gpsShotStart,gpsPos));
   gpsShotStart=null;
   document.getElementById('gpsShotBtn').style.display='inline-block';
   document.getElementById('gpsShotActive').style.display='none';
+  if(dist<5) return; // ignore accidental taps
+  gpsPendingShot={hole:gpsCurHole,dist:dist,club:null,flight:null};
+  document.getElementById('gpsSheetDist').textContent=dist+' m';
+  gpsRenderChips('gpsClubRow',GPS_CLUBS,'club');
+  gpsRenderChips('gpsFlightRow',GPS_FLIGHTS,'flight');
+  document.getElementById('gpsShotSheet').style.display='block';
+}
+function gpsRenderChips(rowId,items,field){
+  var row=document.getElementById(rowId); row.innerHTML='';
+  items.forEach(function(it){
+    var b=document.createElement('button');
+    b.textContent=it;
+    b.style.cssText='background:var(--card);border:1px solid var(--bdr2);border-radius:100px;padding:.4rem .75rem;font-size:.72rem;color:var(--text);cursor:pointer;font-family:inherit';
+    b.onclick=function(){
+      gpsPendingShot[field]=it;
+      Array.prototype.forEach.call(row.children,function(c){ c.style.background='var(--card)'; c.style.color='var(--text)'; c.style.borderColor='var(--bdr2)'; });
+      b.style.background='var(--green)'; b.style.color='#080f0a'; b.style.borderColor='var(--green)';
+    };
+    row.appendChild(b);
+  });
+}
+function gpsSaveShotDetail(){
+  if(gpsPendingShot){
+    gpsShots.push(gpsPendingShot);
+    var ls=document.getElementById('gpsLastShot');
+    ls.textContent='Letzter Schlag: '+gpsPendingShot.dist+' m'+(gpsPendingShot.club?' · '+gpsPendingShot.club:'')+(gpsPendingShot.flight?' · '+gpsPendingShot.flight:'');
+    ls.style.display='block';
+    track('gps_shot_saved',{club:gpsPendingShot.club||'none',flight:gpsPendingShot.flight||'none',dist:gpsPendingShot.dist});
+  }
+  gpsPendingShot=null;
+  document.getElementById('gpsShotSheet').style.display='none';
+}
+function gpsSkipShotDetail(){
+  if(gpsPendingShot){
+    var ls=document.getElementById('gpsLastShot');
+    ls.textContent='Letzter Schlag: '+gpsPendingShot.dist+' m';
+    ls.style.display='block';
+  }
+  gpsPendingShot=null;
+  document.getElementById('gpsShotSheet').style.display='none';
 }
 
 function endGpsRound(){
@@ -1276,13 +1343,15 @@ function endGpsRound(){
   Object.keys(gpsScores).forEach(function(k){ if(gpsScores[k].strokes>0){t+=gpsScores[k].strokes;holes++;putts+=gpsScores[k].putts;} });
   if(holes>0){
     if(!confirm('Runde beenden und speichern? '+t+' Schläge auf '+holes+' Löchern.')) return;
-    var r={course:gpsCourseName||'GPS-Runde',date:new Date().toISOString().split('T')[0],holes:String(holes),score:t,rating:'',weather:'',with:'',dir:'',loss:'',notes:putts>0?(putts+' Putts gesamt'):''};
+    var shotsTxt=gpsShots.map(function(s){return 'Loch '+s.hole+': '+s.dist+'m'+(s.club?' mit '+s.club:'')+(s.flight?' ('+s.flight+')':'');}).join('; ');
+    var r={course:gpsCourseName||'GPS-Runde',date:new Date().toISOString().split('T')[0],holes:String(holes),score:t,rating:'',weather:'',with:'',dir:'',loss:'',notes:(putts>0?(putts+' Putts gesamt'):'')+(shotsTxt?(' | Schläge: '+shotsTxt):''),shots:gpsShots};
     rounds.push(r);
     localStorage.setItem('sm_rounds',JSON.stringify(rounds));
     track('gps_round_completed',{holes:holes,score:t});
     renderStats();
   }
   if(gpsWatch!==null){ navigator.geolocation.clearWatch(gpsWatch); gpsWatch=null; }
+  clearInterval(gpsRefreshTimer);
   gpsPos=null;
   try{ if(gpsWakeLock){ gpsWakeLock.release(); gpsWakeLock=null; } }catch(e){}
   document.getElementById('gpsTracker').style.display='none';
@@ -1291,7 +1360,11 @@ function endGpsRound(){
   var lss=document.getElementById('gpsLastShot'); if(lss) lss.style.display='none';
   if(gpsLMap){ gpsLMap.remove(); gpsLMap=null; gpsMeMarker=null; gpsGreenMarker=null; gpsLine=null; }
   if(holes>0){
-    var msg='Ich habe gerade eine GPS-Runde gespielt: '+t+' Schläge auf '+holes+' Löchern'+(gpsCourseName?' auf '+gpsCourseName:'')+(putts>0?', davon '+putts+' Putts':'')+'. Kurze Einschätzung?';
+    var shotsMsg='';
+    if(gpsShots.length){
+      shotsMsg='\n\nGemessene Schläge:\n'+gpsShots.map(function(s){return '- Loch '+s.hole+': '+s.dist+' m'+(s.club?' mit '+s.club:'')+(s.flight?', '+s.flight:'');}).join('\n');
+    }
+    var msg='Ich habe gerade eine GPS-Runde gespielt: '+t+' Schläge auf '+holes+' Löchern'+(gpsCourseName?' auf '+gpsCourseName:'')+(putts>0?', davon '+putts+' Putts':'')+'.'+shotsMsg+'\n\nKurze Einschätzung — was fällt dir auf?';
     var ac=CATS.find(function(c){return c.id==='analyse';});
     if(ac){ goTab('coach'); selCat(ac); setTimeout(function(){ var ta=document.getElementById('chatIn'); if(ta) ta.value=msg; send(); },300); }
   }
@@ -1318,6 +1391,7 @@ function gpsInitMap(){
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:20}).addTo(gpsLMap);
     // Tap-to-measure
     gpsLMap.on('click',function(e){ gpsTapMeasure(e.latlng.lat,e.latlng.lng); });
+    gpsUpdateDistances(); gpsMapUpdate();
   },300);
 }
 
