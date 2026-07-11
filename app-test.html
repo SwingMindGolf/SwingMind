@@ -253,6 +253,8 @@ input:checked+.tsl::before{transform:translateX(18px);background:#080f0a}
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-rotate@0.2.8/dist/leaflet-rotate-src.js"></script>
+<style>.gps-bunker-lbl{background:rgba(0,0,0,.7);color:#fff;border:none;font-size:.6rem;font-weight:700;padding:1px 5px;border-radius:6px}.gps-bunker-lbl::before{display:none}.gps-tap-lbl{background:#fff;color:#111;font-size:.7rem;font-weight:800;padding:2px 7px;border-radius:8px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.4)}</style>
 </head>
 <body>
 <!-- Wave -->
@@ -279,7 +281,8 @@ input:checked+.tsl::before{transform:translateX(18px);background:#080f0a}
     <button onclick="gpsNextHole()" style="background:var(--card);border:1px solid var(--bdr);border-radius:12px;width:44px;height:44px;font-size:1.2rem;color:var(--text);cursor:pointer">›</button>
   </div>
 
-  <div id="gpsMap" style="margin:0 1.25rem .75rem;height:220px;border-radius:18px;overflow:hidden;border:1px solid var(--bdr);background:var(--card)"></div>
+  <div id="gpsMap" style="margin:0 1.25rem .4rem;height:340px;border-radius:18px;overflow:hidden;border:1px solid var(--bdr);background:var(--card)"></div>
+  <div style="text-align:center;font-size:.64rem;color:var(--muted2);margin-bottom:.6rem">Tippe auf die Karte, um eine Distanz zu messen</div>
   <div style="margin:0 1.25rem;background:var(--card);border:1px solid var(--bdr);border-radius:18px;padding:1.3rem;text-align:center">
     <div style="font-size:.68rem;color:var(--muted);letter-spacing:.06em;margin-bottom:.2rem">ZUM GRÜN (MITTE)</div>
     <div id="gpsDist" style="font-family:'Syne',sans-serif;font-weight:800;font-size:2.6rem;color:var(--green)">–</div>
@@ -1043,16 +1046,23 @@ function startGpsRound(){
 
 function gpsLoadCourse(){
   if(!gpsPos) return;
-  var q='[out:json][timeout:20];(way["golf"="hole"](around:1500,'+gpsPos.lat+','+gpsPos.lon+');way["golf"="green"](around:1500,'+gpsPos.lat+','+gpsPos.lon+');way["leisure"="golf_course"](around:1500,'+gpsPos.lat+','+gpsPos.lon+'););out geom tags;';
+  var la=gpsPos.lat, lo=gpsPos.lon;
+  var q='[out:json][timeout:25];(way["golf"="hole"](around:1500,'+la+','+lo+');way["golf"="green"](around:1500,'+la+','+lo+');way["golf"="tee"](around:1500,'+la+','+lo+');way["golf"="bunker"](around:1500,'+la+','+lo+');nwr["golf"="bunker"](around:1500,'+la+','+lo+');way["leisure"="golf_course"](around:1500,'+la+','+lo+'););out geom tags;';
   fetch('https://overpass-api.de/api/interpreter',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'data='+encodeURIComponent(q)})
   .then(function(r){return r.json();})
   .then(function(data){
-    var holes=[], greens=[];
+    var holes=[], greens=[], tees=[], bunkers=[];
     (data.elements||[]).forEach(function(el){
       if(!el.tags) return;
       if(el.tags.leisure==='golf_course'&&el.tags.name&&!gpsCourseName) gpsCourseName=el.tags.name;
       if(el.tags.golf==='hole'&&el.geometry) holes.push(el);
       if(el.tags.golf==='green'&&el.geometry) greens.push(el);
+      if(el.tags.golf==='tee'&&el.geometry) tees.push(el);
+      if(el.tags.golf==='bunker'){
+        if(el.geometry) bunkers.push(gpsCentroid(el.geometry));
+        else if(el.lat&&el.lon) bunkers.push({lat:el.lat,lon:el.lon});
+        else if(el.center) bunkers.push({lat:el.center.lat,lon:el.center.lon});
+      }
     });
     holes.forEach(function(h){
       var ref=parseInt(h.tags.ref);
@@ -1065,13 +1075,23 @@ function gpsLoadCourse(){
         var d=haversine({lat:end.lat,lon:end.lon},c);
         if(d<bestD){bestD=d;best=g;}
       });
-      var entry={par:parseInt(h.tags.par)||null,green:null,greenPts:null};
+      var start=h.geometry[0];
+      var entry={par:parseInt(h.tags.par)||null,green:null,greenPts:null,tee:{lat:start.lat,lon:start.lon},path:h.geometry.map(function(pt){return{lat:pt.lat,lon:pt.lon};}),bunkers:[]};
       if(best&&bestD<120){
         entry.green=gpsCentroid(best.geometry);
         entry.greenPts=best.geometry.map(function(pt){return{lat:pt.lat,lon:pt.lon};});
       } else {
         entry.green={lat:end.lat,lon:end.lon};
       }
+      // nearest tee to hole start
+      var bt=null,btD=1e9;
+      tees.forEach(function(t){var c=gpsCentroid(t.geometry);var d=haversine({lat:start.lat,lon:start.lon},c);if(d<btD){btD=d;bt=c;}});
+      if(bt&&btD<80) entry.tee=bt;
+      // bunkers within 40m of the hole path
+      bunkers.forEach(function(bk){
+        var near=entry.path.some(function(pp){return haversine(pp,bk)<45;});
+        if(near) entry.bunkers.push(bk);
+      });
       gpsHoles[ref]=entry;
     });
     var n=Object.keys(gpsHoles).length;
@@ -1184,41 +1204,107 @@ function endGpsRound(){
   }
 }
 
-// ── GPS MAP (Leaflet + Esri Satellit) ──
-var gpsLMap=null, gpsMeMarker=null, gpsGreenMarker=null, gpsLine=null, gpsMapCentered=false;
+// ── GPS MAP (Leaflet + Esri Satellit, Hole19-Stil) ──
+var gpsLMap=null, gpsMeMarker=null, gpsGreenMarker=null, gpsTeeMarker=null, gpsLine=null;
+var gpsBunkerMarkers=[], gpsTapMarker=null, gpsTapLine=null, gpsMapCentered=false;
+
+function gpsBearing(a,b){
+  var rad=Math.PI/180;
+  var y=Math.sin((b.lon-a.lon)*rad)*Math.cos(b.lat*rad);
+  var x=Math.cos(a.lat*rad)*Math.sin(b.lat*rad)-Math.sin(a.lat*rad)*Math.cos(b.lat*rad)*Math.cos((b.lon-a.lon)*rad);
+  return Math.atan2(y,x)*180/Math.PI;
+}
+
 function gpsInitMap(){
   if(typeof L==='undefined') return;
   if(gpsLMap){ gpsLMap.remove(); gpsLMap=null; }
-  gpsMapCentered=false;
+  gpsMapCentered=false; gpsMeMarker=null; gpsGreenMarker=null; gpsTeeMarker=null; gpsLine=null; gpsBunkerMarkers=[]; gpsTapMarker=null; gpsTapLine=null;
   setTimeout(function(){
-    gpsLMap=L.map('gpsMap',{zoomControl:true,attributionControl:false}).setView([51.1,10.4],16);
+    gpsLMap=L.map('gpsMap',{zoomControl:false,attributionControl:false,rotate:true,touchRotate:false,bearing:0}).setView([51.1,10.4],16);
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:20}).addTo(gpsLMap);
+    // Tap-to-measure
+    gpsLMap.on('click',function(e){ gpsTapMeasure(e.latlng.lat,e.latlng.lng); });
   },300);
 }
+
+function gpsRotateToHole(){
+  // Rotate map so tee->green points up (green at top). Leaflet.rotate may be absent → fallback: no rotation.
+  var h=gpsHoles[gpsCurHole];
+  if(!h||!h.green||!gpsLMap||typeof gpsLMap.setBearing!=='function') return;
+  var from=h.tee||gpsPos;
+  if(!from) return;
+  var brg=gpsBearing(from,h.green);
+  try{ gpsLMap.setBearing(-brg); }catch(e){}
+}
+
 function gpsMapUpdate(){
   if(!gpsLMap||!gpsPos) return;
   var me=[gpsPos.lat,gpsPos.lon];
   if(!gpsMeMarker){
-    gpsMeMarker=L.circleMarker(me,{radius:8,color:'#fff',weight:2,fillColor:'#16a34a',fillOpacity:1}).addTo(gpsLMap);
+    gpsMeMarker=L.circleMarker(me,{radius:9,color:'#fff',weight:3,fillColor:'#16a34a',fillOpacity:1}).addTo(gpsLMap);
   } else { gpsMeMarker.setLatLng(me); }
+
   var h=gpsHoles[gpsCurHole];
   if(h&&h.green){
     var gp=[h.green.lat,h.green.lon];
     if(!gpsGreenMarker){
-      gpsGreenMarker=L.circleMarker(gp,{radius:9,color:'#fff',weight:2,fillColor:'#eab308',fillOpacity:1}).addTo(gpsLMap);
+      gpsGreenMarker=L.circleMarker(gp,{radius:10,color:'#fff',weight:3,fillColor:'#eab308',fillOpacity:1}).addTo(gpsLMap).bindTooltip('Grün',{permanent:false});
     } else { gpsGreenMarker.setLatLng(gp); }
     if(!gpsLine){
-      gpsLine=L.polyline([me,gp],{color:'#16a34a',weight:3,dashArray:'6,6'}).addTo(gpsLMap);
+      gpsLine=L.polyline([me,gp],{color:'#fff',weight:3}).addTo(gpsLMap);
     } else { gpsLine.setLatLngs([me,gp]); }
+
+    // Bunkers with distance labels
+    if(!gpsBunkerMarkers.length && h.bunkers && h.bunkers.length){
+      h.bunkers.forEach(function(bk){
+        var d=Math.round(haversine(gpsPos,bk));
+        var m=L.circleMarker([bk.lat,bk.lon],{radius:6,color:'#fff',weight:2,fillColor:'#f97316',fillOpacity:1}).addTo(gpsLMap);
+        m._bk=bk; m.bindTooltip(d+' m',{permanent:true,direction:'top',className:'gps-bunker-lbl'});
+        gpsBunkerMarkers.push(m);
+      });
+    } else {
+      gpsBunkerMarkers.forEach(function(m){
+        if(m._bk) m.setTooltipContent(Math.round(haversine(gpsPos,m._bk))+' m');
+      });
+    }
+
     if(!gpsMapCentered){
-      gpsLMap.fitBounds([me,gp],{padding:[40,40],maxZoom:18});
+      gpsLMap.fitBounds([me,gp],{padding:[50,50],maxZoom:18});
+      gpsRotateToHole();
       gpsMapCentered=true;
     }
   } else {
     if(!gpsMapCentered){ gpsLMap.setView(me,17); gpsMapCentered=true; }
   }
+
+  // update tap distance live
+  if(gpsTapMarker){ gpsTapMeasure(gpsTapMarker.getLatLng().lat,gpsTapMarker.getLatLng().lng,true); }
 }
-function gpsMapRecenter(){ gpsMapCentered=false; gpsMapUpdate(); }
+
+function gpsTapMeasure(lat,lon,keep){
+  if(!gpsLMap||!gpsPos) return;
+  var pt=[lat,lon];
+  var d=Math.round(haversine(gpsPos,{lat:lat,lon:lon}));
+  if(!gpsTapMarker){
+    gpsTapMarker=L.circleMarker(pt,{radius:14,color:'#fff',weight:2,fill:false}).addTo(gpsLMap);
+    gpsTapMarker._lbl=L.marker(pt,{icon:L.divIcon({className:'gps-tap-lbl',html:d+' m',iconSize:[54,20],iconAnchor:[27,-8]})}).addTo(gpsLMap);
+  } else {
+    gpsTapMarker.setLatLng(pt);
+    if(gpsTapMarker._lbl){ gpsTapMarker._lbl.setLatLng(pt); gpsTapMarker._lbl.setIcon(L.divIcon({className:'gps-tap-lbl',html:d+' m',iconSize:[54,20],iconAnchor:[27,-8]})); }
+  }
+  if(!gpsTapLine){
+    gpsTapLine=L.polyline([[gpsPos.lat,gpsPos.lon],pt],{color:'#fff',weight:2,dashArray:'4,6'}).addTo(gpsLMap);
+  } else { gpsTapLine.setLatLngs([[gpsPos.lat,gpsPos.lon],pt]); }
+}
+
+function gpsMapRecenter(){
+  gpsMapCentered=false;
+  gpsBunkerMarkers.forEach(function(m){ gpsLMap.removeLayer(m); });
+  gpsBunkerMarkers=[];
+  if(gpsTapMarker){ gpsLMap.removeLayer(gpsTapMarker); if(gpsTapMarker._lbl) gpsLMap.removeLayer(gpsTapMarker._lbl); gpsTapMarker=null; }
+  if(gpsTapLine){ gpsLMap.removeLayer(gpsTapLine); gpsTapLine=null; }
+  gpsMapUpdate();
+}
 
 // ── FIRST WELCOME (einmalig nach erstem Onboarding) ──
 function checkFirstWelcome(){
