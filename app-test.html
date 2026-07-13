@@ -605,7 +605,6 @@ input:checked+.tsl::before{transform:translateX(18px);background:#080f0a}
           <div><h2>Deine Entwicklung</h2><p id="statsSub">Trage Runden ein um Statistiken zu sehen.</p></div>
           <button class="add-r-btn" onclick="openRM()">+ Runde</button>
         </div>
-        <button onclick="startGpsRound()" style="width:100%;background:var(--green);color:#080f0a;border:none;border-radius:14px;padding:.85rem;font-size:.88rem;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:1rem;display:flex;align-items:center;justify-content:center;gap:.5rem">⛳ GPS-Runde starten <span style="font-size:.62rem;background:rgba(0,0,0,0.15);padding:.15rem .5rem;border-radius:100px">BETA</span></button>
         <div class="qs" id="qs"></div>
         <div class="cc">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
@@ -777,6 +776,12 @@ input:checked+.tsl::before{transform:translateX(18px);background:#080f0a}
     <div class="bn" id="bn-stats" onclick="goTab('stats')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
       <span>Statistiken</span>
+    </div>
+    <div onclick="startGpsRound()" style="flex:0 0 68px;display:flex;justify-content:center;align-items:flex-start;cursor:pointer;position:relative">
+      <div style="width:56px;height:56px;border-radius:50%;background:var(--green);display:flex;flex-direction:column;align-items:center;justify-content:center;transform:translateY(-16px);box-shadow:0 5px 16px rgba(74,222,128,.4);border:4px solid var(--bg)">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#080f0a" stroke-width="2.2"><path d="M12 21v-8"/><path d="M12 3v10"/><path d="M12 3l7 3-7 3"/><circle cx="12" cy="21" r="1.5" fill="#080f0a"/></svg>
+        <span style="font-size:.42rem;font-weight:800;color:#080f0a;letter-spacing:.04em;margin-top:-1px">GPS BETA</span>
+      </div>
     </div>
     <div class="bn" id="bn-schwung" onclick="goSchwung()" style="position:relative">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 3l14 9-14 9V3z"/></svg>
