@@ -1411,46 +1411,66 @@ function gpsRotateToHole(){
 }
 
 function gpsMapUpdate(){
-  if(!gpsLMap||!gpsPos) return;
-  var me=[gpsPos.lat,gpsPos.lon];
-  if(!gpsMeMarker){
-    gpsMeMarker=L.circleMarker(me,{radius:9,color:'#fff',weight:3,fillColor:'#16a34a',fillOpacity:1}).addTo(gpsLMap);
-  } else { gpsMeMarker.setLatLng(me); }
-
+  if(!gpsLMap) return;
   var h=gpsHoles[gpsCurHole];
+
+  // Me marker (only if GPS available)
+  if(gpsPos){
+    var me=[gpsPos.lat,gpsPos.lon];
+    if(!gpsMeMarker){
+      gpsMeMarker=L.circleMarker(me,{radius:9,color:'#fff',weight:3,fillColor:'#16a34a',fillOpacity:1}).addTo(gpsLMap);
+    } else { gpsMeMarker.setLatLng(me); }
+  }
+
   if(h&&h.green){
     var gp=[h.green.lat,h.green.lon];
     if(!gpsGreenMarker){
       gpsGreenMarker=L.circleMarker(gp,{radius:10,color:'#fff',weight:3,fillColor:'#eab308',fillOpacity:1}).addTo(gpsLMap).bindTooltip('Grün',{permanent:false});
     } else { gpsGreenMarker.setLatLng(gp); }
-    if(!gpsLine){
-      gpsLine=L.polyline([me,gp],{color:'#fff',weight:3}).addTo(gpsLMap);
-    } else { gpsLine.setLatLngs([me,gp]); }
 
-    // Bunkers with distance labels
+    // Tee marker
+    if(h.tee){
+      var tp=[h.tee.lat,h.tee.lon];
+      if(!gpsTeeMarker){
+        gpsTeeMarker=L.circleMarker(tp,{radius:8,color:'#fff',weight:2,fillColor:'#3b82f6',fillOpacity:1}).addTo(gpsLMap).bindTooltip('Abschlag',{permanent:false});
+      } else { gpsTeeMarker.setLatLng(tp); }
+    }
+
+    // Fairway line: tee -> green (the hole itself), or me -> green if playing
+    var lineFrom = gpsPos ? [gpsPos.lat,gpsPos.lon] : (h.tee?[h.tee.lat,h.tee.lon]:gp);
+    if(!gpsLine){
+      gpsLine=L.polyline([lineFrom,gp],{color:'#fff',weight:3}).addTo(gpsLMap);
+    } else { gpsLine.setLatLngs([lineFrom,gp]); }
+
+    // Bunkers with distance labels (distance from me if available, else from tee)
+    var distFrom = gpsPos || h.tee;
     if(!gpsBunkerMarkers.length && h.bunkers && h.bunkers.length){
       h.bunkers.forEach(function(bk){
-        var d=Math.round(haversine(gpsPos,bk));
         var m=L.circleMarker([bk.lat,bk.lon],{radius:6,color:'#fff',weight:2,fillColor:'#f97316',fillOpacity:1}).addTo(gpsLMap);
-        m._bk=bk; m.bindTooltip(d+' m',{permanent:true,direction:'top',className:'gps-bunker-lbl'});
+        m._bk=bk;
+        m.bindTooltip((distFrom?Math.round(haversine(distFrom,bk)):0)+' m',{permanent:true,direction:'top',className:'gps-bunker-lbl'});
         gpsBunkerMarkers.push(m);
       });
-    } else {
+    } else if(gpsPos){
       gpsBunkerMarkers.forEach(function(m){
         if(m._bk) m.setTooltipContent(Math.round(haversine(gpsPos,m._bk))+' m');
       });
     }
 
+    // Frame the WHOLE hole (tee -> green), Hole19 style
     if(!gpsMapCentered){
-      gpsLMap.fitBounds([me,gp],{padding:[50,50],maxZoom:18});
+      var pts=[gp];
+      if(h.tee) pts.push([h.tee.lat,h.tee.lon]);
+      if(h.path&&h.path.length) h.path.forEach(function(p){pts.push([p.lat,p.lon]);});
+      if(gpsPos) pts.push([gpsPos.lat,gpsPos.lon]);
+      gpsLMap.fitBounds(pts,{padding:[60,60],maxZoom:18});
       gpsRotateToHole();
       gpsMapCentered=true;
     }
   } else {
-    if(!gpsMapCentered){ gpsLMap.setView(me,17); gpsMapCentered=true; }
+    if(!gpsMapCentered && gpsPos){ gpsLMap.setView([gpsPos.lat,gpsPos.lon],17); gpsMapCentered=true; }
   }
 
-  // update tap distance live
   if(gpsTapMarker){ gpsTapMeasure(gpsTapMarker.getLatLng().lat,gpsTapMarker.getLatLng().lng,true); }
 }
 
@@ -1474,6 +1494,9 @@ function gpsMapRecenter(){
   gpsMapCentered=false;
   gpsBunkerMarkers.forEach(function(m){ gpsLMap.removeLayer(m); });
   gpsBunkerMarkers=[];
+  if(gpsTeeMarker){ gpsLMap.removeLayer(gpsTeeMarker); gpsTeeMarker=null; }
+  if(gpsGreenMarker){ gpsLMap.removeLayer(gpsGreenMarker); gpsGreenMarker=null; }
+  if(gpsLine){ gpsLMap.removeLayer(gpsLine); gpsLine=null; }
   if(gpsTapMarker){ gpsLMap.removeLayer(gpsTapMarker); if(gpsTapMarker._lbl) gpsLMap.removeLayer(gpsTapMarker._lbl); gpsTapMarker=null; }
   if(gpsTapLine){ gpsLMap.removeLayer(gpsTapLine); gpsTapLine=null; }
   gpsMapUpdate();
