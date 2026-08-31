@@ -698,13 +698,16 @@ input:checked+.tsl::before{transform:translateX(18px);background:#080f0a}
     <button class="mx" onclick="closeRM()">×</button>
     <div class="mhandle"></div>
     <div class="mh">Runde eintragen ⛳</div>
-    <div class="f"><label>Platz / Kurs</label><input id="rc" placeholder="Traisa Golf Club"></div>
+    <div class="f"><label>Platz / Kurs</label><input id="rc" placeholder="Traisa Golf Club" onblur="suggestPar()"></div>
     <div class="g2">
       <div class="f"><label>Datum</label><input type="date" id="rd"></div>
-      <div class="f"><label>Löcher</label><select id="rh"><option value="9">9 Loch</option><option value="18">18 Loch</option></select></div>
+      <div class="f"><label>Löcher</label><select id="rh" onchange="suggestPar()"><option value="9">9 Loch</option><option value="18">18 Loch</option></select></div>
     </div>
     <div class="g2">
       <div class="f"><label>Score <em>*</em></label><input type="number" id="rs" placeholder="54"></div>
+      <div class="f"><label>Par des Platzes</label><input type="number" id="rpar" placeholder="36"></div>
+    </div>
+    <div class="g2">
       <div class="f"><label>Bewertung</label>
         <select id="rp"><option value="">Wählen</option><option value="5">⭐⭐⭐⭐⭐ Sehr gut</option><option value="4">⭐⭐⭐⭐ Gut</option><option value="3">⭐⭐⭐ Ok</option><option value="2">⭐⭐ Schlecht</option><option value="1">⭐ Sehr schlecht</option></select>
       </div>
@@ -1381,10 +1384,11 @@ function renderGoalCard(){
 }
 function calcEstHcp(){
   if(rounds.length===0) return null;
-  // Differentials: score - par (9=36, 18=72)
+  // Differentials über Par, auf 18 Loch normiert (9-Loch-Diff zählt doppelt)
   var diffs=rounds.map(function(r){
-    var par=String(r.holes)==='18'?72:36;
-    return r.score-par;
+    var par=r.par||(String(r.holes)==='18'?72:36);
+    var d=r.score-par;
+    return String(r.holes)==='18'?d:d*2;
   });
   // Best 40% of differentials (simplified)
   diffs.sort(function(a,b){return a-b;});
@@ -1557,17 +1561,30 @@ function mkRoundRow(r,realIdx){
 }
 
 // ── ROUNDS ──
+
+function getCoursePars(){ return JSON.parse(localStorage.getItem('sm_course_pars')||'{}'); }
+function suggestPar(){
+  var rp2=document.getElementById('rpar'); if(!rp2||rp2.value) return;
+  var course=(gv('rc')||'').trim().toLowerCase();
+  var pars=getCoursePars();
+  if(course&&pars[course]){ rp2.value=pars[course]; return; }
+  rp2.placeholder = gv('rh')==='18' ? '72' : '36';
+}
 function openRM(){ var d=document.getElementById('rd'); if(d) d.value=new Date().toISOString().split('T')[0]; var m=document.getElementById('rModal'); if(m) m.classList.add('on'); }
 function closeRM(){ editIdx=-1; var m=document.getElementById('rModal'); if(m) m.classList.remove('on'); }
 function saveRound(){
   var sc=document.getElementById('rs'); if(!sc||!sc.value){alert('Bitte Score eingeben.');return;}
-  var r={course:gv('rc')||'Runde',date:gv('rd')||new Date().toISOString().split('T')[0],holes:gv('rh')||'9',score:parseInt(sc.value),rating:gv('rp'),weather:gv('rweather'),with:gv('rwith'),dir:gv('rdir'),loss:gv('rloss'),notes:gv('rn')};
+  var parVal=parseInt(gv('rpar'))||((gv('rh')||'9')==='18'?72:36);
+  var r={course:gv('rc')||'Runde',date:gv('rd')||new Date().toISOString().split('T')[0],holes:gv('rh')||'9',score:parseInt(sc.value),par:parVal,rating:gv('rp'),weather:gv('rweather'),with:gv('rwith'),dir:gv('rdir'),loss:gv('rloss'),notes:gv('rn')};
+  var cKey=(r.course||'').trim().toLowerCase();
+  if(cKey&&gv('rpar')){ var cp=getCoursePars(); cp[cKey]=parVal; localStorage.setItem('sm_course_pars',JSON.stringify(cp)); }
   var isEdit=editIdx>=0;
   if(isEdit){ rounds[editIdx]=r; } else { rounds.push(r); }
   localStorage.setItem('sm_rounds',JSON.stringify(rounds));
   editIdx=-1; closeRM(); renderStats();
   if(!isEdit){
-    var msg='Ich habe gerade gespielt: '+r.score+' Schläge auf '+r.holes+' Loch'+(r.course?' auf '+r.course:'')+(r.dir?', Abschlag: '+r.dir:'')+(r.notes?'. Notiz: '+r.notes:'')+'. Kurze Einschätzung und Handicap-Update?';
+    var overPar=r.score-r.par;
+    var msg='Ich habe gerade gespielt: '+r.score+' Schläge auf '+r.holes+' Loch (Par '+r.par+', also '+(overPar>0?'+':'')+overPar+')'+(r.course?' auf '+r.course:'')+(r.dir?', Abschlag: '+r.dir:'')+(r.notes?'. Notiz: '+r.notes:'')+'. Kurze Einschätzung und Handicap-Update?';
     goTab('coach'); setTimeout(function(){ var ta=document.getElementById('chatIn'); if(ta) ta.value=msg; send(); },300);
   }
 }
@@ -1579,6 +1596,7 @@ function editRound(idx){
   var rd=document.getElementById('rd'); if(rd) rd.value=r.date||'';
   var rh=document.getElementById('rh'); if(rh) rh.value=r.holes||'9';
   var rs=document.getElementById('rs'); if(rs) rs.value=r.score||'';
+  var rpa=document.getElementById('rpar'); if(rpa) rpa.value=r.par||'';
   var rp=document.getElementById('rp'); if(rp) rp.value=r.putts||'';
   var rn=document.getElementById('rn'); if(rn) rn.value=r.notes||'';
   // Set direction
